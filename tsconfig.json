@@ -1,11 +1,13 @@
 {
-  "extends": "@tsconfig/node22/tsconfig.json",
   "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    
     "rootDir": "./src",
     "outDir": "./dist",
 
-    "module": "nodenext",
     "types": ["node"],
+    "moduleResolution": "NodeNext",
 
     "sourceMap": true,
     "declaration": true,
@@ -30,11 +32,9 @@
     "src/**/*.cts",
     "src/**/*.mts",
     "src/**/*.d.ts",
-    "src/**/*.tsx"
-, "src/Config/MqttConfigs.ts", "src/Config/LoadEnv.ts"  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "build"
-  ]
+    "src/**/*.tsx",
+    "src/Config/MqttConfigs.ts",
+    "src/Config/LoadEnv.ts"
+  ],
+  "exclude": ["node_modules", "dist", "build"]
 }
