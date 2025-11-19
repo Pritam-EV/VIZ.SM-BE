@@ -4,10 +4,10 @@
     "description": "Spark Smart Meter Backend Project",
     "main": "dist/server.js",
     "scripts": {
-        "build":  "npm install --include=dev && tsc",
+        "build": "npm install --include=dev && tsc",
         "start": "cross-env NODE_ENV=production node dist/server.js",
         "test": "echo \"Error: no test specified\" && exit 1",
-        "dev": "cross-env NODE_ENV=development node dist/server.js",
+        "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
         "devx": "nodemon"
     },
     "author": "Krishna (https://github.com/KrishnaG-Tech)",
@@ -40,6 +40,7 @@
         "eslint": "^9.33.0",
         "globals": "^16.3.0",
         "nodemon": "^3.1.10",
+        "ts-node-dev": "^2.0.0",
         "typescript": "^5.9.2",
         "typescript-eslint": "^8.39.0"
     },
