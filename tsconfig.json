@@ -7,6 +7,7 @@
     "outDir": "./dist",
 
     "types": ["node"],
+     "typeRoots": ["./node_modules/@types"],
     "moduleResolution": "NodeNext",
 
     "sourceMap": true,
