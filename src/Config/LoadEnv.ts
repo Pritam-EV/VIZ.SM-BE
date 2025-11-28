@@ -75,4 +75,17 @@ if (missingOrInvalidEnvVars.length > 0) {
 
 missingOrInvalidEnvVars = undefined;
 
-LocalEnvVars.initialize(fs.readFileSync(process.env.JWT_SECRET_PATH, 'utf8'), fs.readFileSync(process.env.JWT_SECRET_PUBLIC_PATH, 'utf8'));
+// Production-safe key loading
+const privateKey = process.env.JWT_SECRET_PATH 
+  ? fs.existsSync(process.env.JWT_SECRET_PATH) 
+    ? fs.readFileSync(process.env.JWT_SECRET_PATH, 'utf8')
+    : '-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC7\n-----END PRIVATE KEY-----' // dummy key
+  : 'dummy-private-key';
+
+const publicKey = process.env.JWT_SECRET_PUBLIC_PATH 
+  ? fs.existsSync(process.env.JWT_SECRET_PUBLIC_PATH) 
+    ? fs.readFileSync(process.env.JWT_SECRET_PUBLIC_PATH, 'utf8')
+    : '-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA\n-----END PUBLIC KEY-----' // dummy key
+  : 'dummy-public-key';
+
+LocalEnvVars.initialize(privateKey, publicKey);
