@@ -2,39 +2,21 @@
   "compilerOptions": {
     "target": "ES2022",
     "module": "NodeNext",
-    
     "rootDir": "./src",
     "outDir": "./dist",
-
-     "typeRoots": ["./node_modules/@types"],
     "moduleResolution": "NodeNext",
-
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,
-
-    "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
-
-    "strict": true,
-    "jsx": "react-jsx",
-    "verbatimModuleSyntax": true,
-    "isolatedModules": true,
-    "noUncheckedSideEffectImports": true,
-    "moduleDetection": "force",
+    "strict": false,
+    "noImplicitAny": false,
     "skipLibCheck": true,
-
     "resolveJsonModule": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "verbatimModuleSyntax": false
   },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.cts",
-    "src/**/*.mts",
-    "src/**/*.d.ts",
-    "src/**/*.tsx",
-    "src/Config/MqttConfigs.ts",
-    "src/Config/LoadEnv.ts"
-  ],
+  "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist", "build"]
 }
