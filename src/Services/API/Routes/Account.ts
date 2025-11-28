@@ -1,15 +1,12 @@
-import { Router } from "express";
+// src/Services/API/Routes/Account.ts
 import express from 'express';
-import AccountController from "../Controllers/Account.js";
-
-const accountRouter = Router();
-
-const accountController = new AccountController();
+import AccountController from '../Controllers/Account.js';  // ← Points to your controller
 
 const router = express.Router();
+const controller = new AccountController();
 
-router.post('/userSignUp', accountController.userSignUp.bind(accountController));
-router.post('/partnerSignUp', accountController.partnerSignUp.bind(accountController));
-router.post('/signIn', accountController.signIn.bind(accountController));
+router.post('/userSignUp', controller.userSignUp.bind(controller));
+router.post('/partnerSignUp', controller.partnerSignUp.bind(controller));
+router.post('/signIn', controller.signIn.bind(controller));
 
-export default accountRouter;
+export default router;
