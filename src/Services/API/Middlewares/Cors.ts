@@ -1,20 +1,13 @@
-import cors from "cors";
+// src/Services/API/Middlewares/Cors.ts
+import cors from 'cors';
 
-const corsHandler = cors(
-    {
-        // Allowed origins
-        origin: [
-            process.env.CLIENT_URL!
-        ],
-        methods: [
-            "GET",
-            "POST",
-            "PUT",
-            "PATCH",
-            "DELETE"
-        ],
-        credentials: true, // Allow cookies and authentication headers to be sent with cross-origin requests
-    }
-);
-
-export default corsHandler;
+export default cors({
+  origin: [
+    'http://localhost:3000', 
+    'https://smartmeter-vjratechnologies.web.app',  // ← YOUR FIREBASE URL
+    'https://smartmeter-vjratechnologies.firebaseapp.com'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+});
