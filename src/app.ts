@@ -16,7 +16,7 @@ export default function buildApp() {
     app.use(urlencoded({ extended: true }));
     app.use(json());
     // Add this line
-    app.use('/api/account', require('./Services/API/Routes/Account'));
+    
 
     // Track request
     app.use(requestTrackingMiddleware);
@@ -41,7 +41,7 @@ export default function buildApp() {
     
     app.use("", baseRouter);
     // TODO: redirect to home (or login) for anything didn't match above
-
+    app.use('/api/account', require('./Services/API/Routes/Account'));
     app.use(errorMiddleware);
 
     return app; // The app instance
