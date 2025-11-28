@@ -1,14 +1,15 @@
 import { Router } from "express";
+import express from 'express';
 import AccountController from "../Controllers/Account.js";
 
 const accountRouter = Router();
 
 const accountController = new AccountController();
 
-accountRouter.post("/signin", accountController.signIn);
+const router = express.Router();
 
-accountRouter.post("/signup/partner", accountController.partnerSignUp);
-
-accountRouter.post("/signup/user", accountController.userSignUp);
+router.post('/userSignUp', accountController.userSignUp.bind(accountController));
+router.post('/partnerSignUp', accountController.partnerSignUp.bind(accountController));
+router.post('/signIn', accountController.signIn.bind(accountController));
 
 export default accountRouter;
