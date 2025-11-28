@@ -137,7 +137,7 @@ export class Handler {
                 loginTokenPayload,
                 LocalEnvVars.jwtPrivateKey,
                 {
-                    algorithm: "RS256",
+                    algorithm: "HS256",
                     notBefore: "10ms",
                     expiresIn: result.isPasswordExpired ? "5m" : command.remember ? "1d" : "1h"
                 }
@@ -151,7 +151,7 @@ export class Handler {
             }
             this.#logger.error(error as Error, "Error occured while creating a user.", { input: command });
 
-            throw new HttpError(500, "Something failed while creating a user account.");
+            throw new HttpError(500, `Login failed: ${error.message}`);
         }
     }
 }
