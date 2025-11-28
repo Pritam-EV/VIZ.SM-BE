@@ -334,13 +334,13 @@ function isValidSubscriptionOptions(options: unknown): options is mqtt.IClientSu
     return "qos" in options && typeof options.qos === "number" && MqttQoSLevels.includes(options.qos as QoS);
 }
 
-function assignValueIfUnspecified<TMain, TRef>(mainObj: TMain, refObj: TRef): TMain {
+function assignValueIfUnspecified<TMain, TRef extends Partial<TMain>>(mainObj: TMain, refObj: TRef): TMain {
     if (typeof refObj !== "undefined" && refObj !== null) {
         if (typeof mainObj === "undefined" || mainObj === null) {
-            mainObj = refObj as TMain;
+            mainObj = refObj as unknown as TMain;
         }
         else if (typeof refObj === "number" && typeof mainObj === "number" && Number.isFinite(refObj) && !Number.isFinite(mainObj)) {
-            mainObj = refObj as TMain;
+            mainObj = refObj as unknown as TMain;
         }
         else if (typeof refObj === "object" && typeof mainObj === "object") {
             // Iterable object like Array, Set, Map, ...
@@ -375,7 +375,7 @@ function assignValueIfUnspecified<TMain, TRef>(mainObj: TMain, refObj: TRef): TM
                         }
                     }
                     else if (([...mainObj]).length < 1) {
-                        mainObj = refObj as TMain;
+                        mainObj = refObj as unknown as TMain;
                     }
                     // else {} // TODO: handle custom iterable
                 }
