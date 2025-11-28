@@ -40,8 +40,8 @@ export default function buildApp() {
     app.use('/api', baseRouter);
     
     app.use("", baseRouter);
-    // TODO: redirect to home (or login) for anything didn't match above
-    app.use('/api/account', require('./Services/API/Routes/Account'));
+
+
     app.use(errorMiddleware);
 
     return app; // The app instance
