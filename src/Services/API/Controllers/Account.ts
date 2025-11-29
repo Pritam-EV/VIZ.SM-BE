@@ -4,64 +4,84 @@ import * as SignIn from "../../../Components/Commands/Account/SignIn.js";
 import * as CreatePartner from "../../../Components/Commands/Partner/Create.js";
 import * as CreateUser from "../../../Components/Commands/User/Create.js";
 import { ResponseStatus } from "../../../Shared/Common/Enums/Http.js";
+// ✅ FIXED - Add .js extension
+import { Command as GetUserDevicesCommand, Handler as GetUserDevicesHandler } from "../../../Components/Commands/Account/GetUserDevicesCommand.js";
 
 export default class AccountController {
-    async signIn(req: Request, res: Response) {
-        const [isSuccessful, resultData] = await (new SignIn.Handler((req as RequestWithUser).customContext.logger)).handle(
-            new SignIn.Command(
-                req.body.username,
-                req.body.password,
-                req.body.remember
-            )
-        );
+  async signIn(req: Request, res: Response) {
+    const [isSuccessful, resultData] = await (new SignIn.Handler(
+      (req as RequestWithUser).customContext.logger
+    )).handle(
+      new SignIn.Command(
+        req.body.username,
+        req.body.password,
+        req.body.remember
+      )
+    );
 
-        if (isSuccessful) {
-            res.status(ResponseStatus.Ok).json(resultData);
-        }
-        else {
-            res.status(ResponseStatus.BadRequest).json(resultData);
-        }
+    if (isSuccessful) {
+      res.status(ResponseStatus.Ok).json(resultData);
+    } else {
+      res.status(ResponseStatus.BadRequest).json(resultData);
     }
+  }
 
-    async userSignUp(req: Request, res: Response) {
-        const [isSuccessful, invalidData] = await (new CreateUser.Handler((req as RequestWithUser).customContext.logger)).handle(
-            new CreateUser.Command(
-                req.body.firstName,
-                req.body.mobile,
-                req.body.email,
-                req.body.password,
-                req.body.aadhar,
-                req.body.pan
-            )
-        );
+  async userSignUp(req: Request, res: Response) {
+    const [isSuccessful, invalidData] = await (new CreateUser.Handler(
+      (req as RequestWithUser).customContext.logger
+    )).handle(
+      new CreateUser.Command(
+        req.body.firstName,
+        req.body.mobile,
+        req.body.email,
+        req.body.password,
+        req.body.aadhar,
+        req.body.pan
+      )
+    );
 
-        if (isSuccessful) {
-            res.sendStatus(ResponseStatus.NoContent);
-        }
-        else {
-            res.status(ResponseStatus.BadRequest).json({ invalid: invalidData });
-        }
+    if (isSuccessful) {
+      res.sendStatus(ResponseStatus.NoContent);
+    } else {
+      res.status(ResponseStatus.BadRequest).json({ invalid: invalidData });
     }
-    
-    async partnerSignUp(req: Request, res: Response) {
-        const [isSuccessful, invalidData] = await (new CreatePartner.Handler((req as RequestWithUser).customContext.logger)).handle(
-            new CreatePartner.Command(
-                req.body.firstName,
-                req.body.mobile,
-                req.body.email,
-                req.body.password,
-                req.body.aadhar,
-                req.body.pan,
-                req.body.middleName,
-                req.body.lastName
-            )
-        );
+  }
 
-        if (isSuccessful) {
-            res.sendStatus(ResponseStatus.NoContent);
-        }
-        else {
-            res.status(ResponseStatus.BadRequest).json({ invalid: invalidData });
-        }
+  async partnerSignUp(req: Request, res: Response) {
+    const [isSuccessful, invalidData] = await (new CreatePartner.Handler(
+      (req as RequestWithUser).customContext.logger
+    )).handle(
+      new CreatePartner.Command(
+        req.body.firstName,
+        req.body.mobile,
+        req.body.email,
+        req.body.password,
+        req.body.aadhar,
+        req.body.pan,
+        req.body.middleName,
+        req.body.lastName
+      )
+    );
+
+    if (isSuccessful) {
+      res.sendStatus(ResponseStatus.NoContent);
+    } else {
+      res.status(ResponseStatus.BadRequest).json({ invalid: invalidData });
     }
+  }
+
+  // ✅ FIXED getUserDevices method
+async getUserDevices(req: RequestWithUser, res: Response): Promise<void> {
+  const handler = new GetUserDevicesHandler((req as any).customContext.logger);
+  const [isSuccessful, resultData] = await handler.handle(
+    new GetUserDevicesCommand((req as any).user._id.toString())
+  );
+  
+  if (isSuccessful) {
+    res.status(ResponseStatus.Ok).json(resultData);
+  } else {
+    res.status(ResponseStatus.BadRequest).json(resultData);
+  }
+}
+
 }

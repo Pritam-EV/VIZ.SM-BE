@@ -154,14 +154,14 @@ const ElectricTelemetrySchema = new Schema<IElectricTelemetry>(
 // const DeviceSchema = new Schema<IDevice>(
 const DeviceSchema = new Schema(
     {
-        _id: {
+                serialnumber: {
             type: Schema.Types.String,
             required: true,
             trim: true,
             uppercase: true,
-            minLength: 10,
+            minLength: 3,
             maxLength: 20,
-            // unique: true, // implicit
+            unique: true, // implicit
             immutable: true
         },
         // TODO: configure correct validations
@@ -191,8 +191,8 @@ const DeviceSchema = new Schema(
         rate: {
             type: Schema.Types.Number,
             required: true,
-            min: [10, "Invalid rate"],
-            default: 20
+            min: [0, "Invalid rate"],
+            default: 12
         },
         pool: {
             type: Schema.Types.Number,
@@ -216,6 +216,12 @@ const DeviceSchema = new Schema(
             type: Schema.Types.ObjectId,
             required: true,
             ref: 'Partner',
+            default: null
+        },
+                user: {
+            type: Schema.Types.ObjectId,
+            required: true,
+            ref: 'User',
             default: null
         }
     },
