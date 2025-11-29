@@ -21,16 +21,17 @@ export class Handler {
 
   public async handle(command: Command): Promise<TResult> {
     try {
+            console.log('🔍 Searching for user:', command.userId); // ADD
       const userDevicesFilter: FilterQuery<any> = {
         user: command.userId,
         status: { $in: [DeviceStatus.Active, DeviceStatus.Pending] }
       };
-
+console.log('🔍 Filter:', JSON.stringify(userDevicesFilter)); // ADD
       const device = await Device.findOne(
         userDevicesFilter,
         { serialnumber: 1, pool: 1, status: 1, rate: 1, totalEnergy: 1 }
       ).lean();
-
+  console.log('🔍 Found device:', device); // ADD
       return [true, { device: device || null }];
     } catch (error) {
       this.#logger.error(error as Error, "Failed to fetch user devices", { 
