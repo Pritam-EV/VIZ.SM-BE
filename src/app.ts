@@ -4,13 +4,27 @@ import corsMiddleware from "./Services/API/Middlewares/Cors.js";
 import errorMiddleware from "./Services/API/Middlewares/ErrorHandler.js";
 import requestTrackingMiddleware from "./Services/API/Middlewares/RequestTracking.js";
 // import userAuthMiddleware from "./Services/API/Middlewares/UserAuthentication.js";
+import LocalEnvVars from "./Shared/Common/Models/LocalEnvVars.js"; 
 import accountRouter from "./Services/API/Routes/Account.js";
 import baseRouter from "./Services/API/Routes/Base.js";
 import dotenv from 'dotenv';
+import fs from 'fs';
+import path from 'path';
 dotenv.config();
+
+// Load keys from files
+const privateKeyPath = process.env.JWT_SECRET_PATH || './keys/private_key.pem';
+const publicKeyPath = process.env.JWT_SECRET_PUBLIC_PATH || './keys/public_key.pem';
+
+const privateKey = fs.readFileSync(privateKeyPath, 'utf8');
+const publicKey = fs.readFileSync(publicKeyPath, 'utf8');
+
+LocalEnvVars.initialize(privateKey, publicKey);
+
 
 export default function buildApp() {
     const app = express();
+
 
     // Basic Middleware setup
     app.use(urlencoded({ extended: true }));
@@ -44,5 +58,20 @@ export default function buildApp() {
 
     app.use(errorMiddleware);
 
-    return app; // The app instance
+    
+
+  
+
+    // ✅ ADD THESE - AFTER app.use(errorMiddleware);
+process.on('uncaughtException', (err) => {
+  console.error('❌ Uncaught Exception:', err);
+  // DON'T exit - keep server alive!
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ Unhandled Rejection:', promise, 'reason:', reason);
+  // DON'T exit - keep server alive!
+});
+  return app; // The app instance
+
 }

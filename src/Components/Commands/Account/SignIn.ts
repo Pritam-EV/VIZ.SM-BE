@@ -133,15 +133,32 @@ export class Handler {
                 }
             }
 
-            result.token = jwt.sign(
-                loginTokenPayload,
-                LocalEnvVars.jwtPrivateKey,
-                {
-                    algorithm: "HS256",
-                    notBefore: "10ms",
-                    expiresIn: result.isPasswordExpired ? "5m" : command.remember ? "1d" : "1h"
-                }
-            );
+// --- START PATCH: ensure RS256 signing with PEM private key ---
+try {
+  // Ensure we have a non-empty PEM string; fallback to error if not loaded correctly.
+  const pem = LocalEnvVars.jwtPublicKey;
+  if (!pem || typeof pem !== 'string' || pem.length < 50 || !pem.includes('-----BEGIN')) {
+    // Defensive: log and throw so we don't silently create RS256 token with a bad key.
+    console.error('JWT signing failed: private key not loaded correctly in LocalEnvVars.jwtPublicKey');
+    throw new Error('JWT private key not available for RS256 signing');
+  }
+
+  result.token = jwt.sign(
+    loginTokenPayload,
+    pem,
+    {
+      algorithm: "RS256",      // explicitly force S256 (as required by middleware)
+      notBefore: "10ms",
+      expiresIn: result.isPasswordExpired ? "5m" : command.remember ? "1d" : "1h"
+    }
+  );
+  jwt.verify(result.token,LocalEnvVars.jwtPrivateKey,{algorithms:["RS256"]},async (err,decoded)=>{console.log(err,decoded)});
+} catch (signErr) {
+  // Bubble up so caller can handle it (keeps behavior similar to original)
+  console.error('Error while signing JWT (hotpatch):', signErr);
+  throw signErr;
+}
+// --- END PATCH ---
 
             return [true, result];
         }

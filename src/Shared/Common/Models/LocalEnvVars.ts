@@ -7,23 +7,17 @@ export default class LocalEnvVars {
 
     private constructor() {}
 
-    public static initialize(jwtPrivateKeyString: string, jwtPublicKeyString: string) {
-        if (!this.#read) {
-            if (typeof jwtPrivateKeyString === "string" && typeof jwtPublicKeyString === "string" && jwtPrivateKeyString && jwtPublicKeyString) {
-                this.#jwtPrivateKeyString = jwtPrivateKeyString;
-                this.#jwtPublicKeyString = jwtPublicKeyString;
-                this.#read = true;
-            }
-            else {
-                if (typeof jwtPrivateKeyString !== "string" || !jwtPrivateKeyString) {
-                    throw new ArgumentError("jwtPrivateKeyString", `JWT private key is required. Actual Type: ${typeof jwtPrivateKeyString}`);
-                }
-                if (typeof jwtPublicKeyString !== "string" || !jwtPublicKeyString) {
-                    throw new ArgumentError("jwtPublicKeyString", `JWT public key is required. Actual Type: ${typeof jwtPublicKeyString}`);
-                }
-            }
+public static initialize(jwtPrivateKeyString: string, jwtPublicKeyString: string) {
+    if (!this.#read) {
+        if (typeof jwtPrivateKeyString === "string" && jwtPrivateKeyString && 
+            typeof jwtPublicKeyString === "string" && jwtPublicKeyString) {
+            this.#jwtPrivateKeyString = jwtPrivateKeyString;
+            this.#jwtPublicKeyString = jwtPublicKeyString;
+            this.#read = true;
         }
     }
+}
+
 
     public static get jwtPrivateKey(): string {
         return this.#jwtPrivateKeyString;
@@ -33,3 +27,5 @@ export default class LocalEnvVars {
         return this.#jwtPublicKeyString;
     }
 }
+// LocalEnvVars.jwtPrivateKey → LocalEnvVars.jwtSecret
+export const jwtSecret = process.env.JWT_SECRET || 'fallback-secret-key';

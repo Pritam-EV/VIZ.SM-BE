@@ -16,4 +16,6 @@ export default function errorMiddleware(err: any, req: Request, res: Response, n
     message,
     ...(isDev ? { stack: err.stack || null, details: err?.errors || null } : {})
   });
+
+  
 }
