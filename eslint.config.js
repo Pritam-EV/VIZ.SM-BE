@@ -46,14 +46,14 @@ export default defineConfig([
     tseslint.configs.recommended,
     globalIgnores(
         [
-            "node_modules/",
-            "dist/",
-            "build/",
-            "*.env",
-            ".env.*",
-            "*.env.*",
-            "**/temp/",
-            "**/tmp/"
+          "node_modules/",
+          "dist/",
+          "build/",
+          "*.env",
+          ".env.*",
+          "*.env.*",
+          "**/temp/",
+          "**/tmp/"
         ]
     )
 ]);

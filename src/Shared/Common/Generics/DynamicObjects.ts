@@ -113,7 +113,7 @@ function sanitizeKey<TKey extends PropertyKey>(key: TKey): TKey {
         case "number": 
             return key || (key === 0 ? key : 0) as TKey;
         case "symbol":
-            return key as TKey || (Symbol("") as any) as TKey;
+            return key || Symbol("");
         default:
             throw new TypeError(`${typeof key} type is not supported for the key.`);
     }

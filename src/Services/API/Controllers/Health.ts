@@ -15,7 +15,7 @@ export default class HealthController
             throw new ArgumentError("message", `Parameter 'message' has invalid type. Expected: 'string' Actual: '${typeof message}'`);
         }
         if (message) {
-            throw new HttpError(ResponseStatus.InternalServerError, String(message), true);
+            throw new HttpError(ResponseStatus.InternalServerError, message, true);
             // res.status(500).send(message);
         }
         else {

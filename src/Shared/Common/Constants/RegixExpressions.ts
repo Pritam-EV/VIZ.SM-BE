@@ -27,4 +27,4 @@ export const PanCardNumberRegExp = /^[a-zA-Z]{5}[0-9]{4}[a-zA-Z]$/;
  * Containing 8 to 16 allowed characters only  
  * Note: Do not exceed 16 character limit as bcryptjs hash ignores input beyond 72 bytes. It will lead to match all password prefix from 72 bytes till any.
  */
-export const LoginPasswordRegExp = /^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[~!@#$%^&*\-_+=:;.?])[A-Za-z0-9~!@#$%^&*\-_+=:;.?]{8,16}$/;
+export const LoginPasswordRegExp = /^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[~!@#$%^&*\-_+=:;.?])[A-Za-z0-9~!@#$%^&*\-_+=:;.?]{8, 16}$/;

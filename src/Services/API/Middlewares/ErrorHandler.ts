@@ -1,21 +1,45 @@
-// src/Services/API/Middlewares/ErrorHandler.ts
-import type { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from "express";
+import { isHttpError } from "http-errors";
+import { HttpError, AlertError } from "../../../Shared/Common/CustomErrors/HttpErrors.js";
+import { toAlertType } from "../../../Shared/Common/Enums/AlertTypes.js";
+import { BaseMessageResponse, Alert, AlertsResponse } from "../../../Shared/Common/Models/Responses.js";
+import type { RequestWithLoggerOnly } from "../../../Shared/Common/Types/ApiTypes.js";
+import type { LoggableType } from "../../../Shared/Common/Types/LoggableTypes.js";
 
-export default function errorMiddleware(err: any, req: Request, res: Response, next: NextFunction) {
-  // Log the full error server-side
-  console.error('=== ERROR-MIDDLEWARE START ===');
-  console.error(err && err.stack ? err.stack : err);
-  console.error('=== ERROR-MIDDLEWARE END ===');
+export default async function handleError(err: unknown, req: Request, res: Response, next: NextFunction) {
+    try {
+        if ((req as RequestWithLoggerOnly).customContext?.logger) {
+            (req as RequestWithLoggerOnly).customContext.logger.error(err as LoggableType, "Something went wrong.");
+        }
+        else {
+            console.error(err, "Something went wrong", "Request:", req);
+        }
 
-  const isDev = process.env.NODE_ENV !== 'production';
-  const status = (err && err.statusCode) ? err.statusCode : 500;
-  const message = (err && err.message) ? err.message : 'Internal Server Error';
+        if (typeof err === "object" && err instanceof Error && !isHttpError(err)) {
+            if (err instanceof HttpError) {
+                if (err.doExpose) {
+                    if (err instanceof AlertError) {
+                        res.status(err.statusCode).json(new AlertsResponse(new Alert(err.message, toAlertType(err.alertType))));
+                    }
+                    else {
+                        res.status(err.statusCode).json(new BaseMessageResponse(err.message));
+                    }
+                }
+                else {
+                    res.status(err.statusCode).end();
+                }
+            }
+            else {
+                res.status(500).send("Something went wrong");
+            }
+        }
+        else {
+            next(err);
+        }
+    }
+    catch (error) {
+        console.error("An error occured while handling the previous error.", { newError: error, previousError: err });
 
-  // Send JSON body with message and stack (dev only)
-  return res.status(status).json({
-    message,
-    ...(isDev ? { stack: err.stack || null, details: err?.errors || null } : {})
-  });
-
-  
+        next(err);
+    }
 }
