@@ -13,8 +13,8 @@ import path from 'path';
 dotenv.config();
 
 // Load keys from files
-const privateKeyPath = process.env.JWT_SECRET_PATH || './keys/private_key.pem';
-const publicKeyPath = process.env.JWT_SECRET_PUBLIC_PATH || './keys/public_key.pem';
+const privateKeyPath = process.env.JWT_SECRET_PATH || './private_key.pem';
+const publicKeyPath = process.env.JWT_SECRET_PUBLIC_PATH || './public_key.pem';
 
 const privateKey = fs.readFileSync(privateKeyPath, 'utf8');
 const publicKey = fs.readFileSync(publicKeyPath, 'utf8');
