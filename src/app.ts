@@ -26,7 +26,16 @@ export default function buildApp() {
   const app = express();
 
   // ✅ MOVE CORS TO THE TOP (before any other middleware)
-app.use(cors());
+  app.use(cors({
+    origin: [
+      'http://127.0.0.1:3000',
+      'http://localhost:3000',
+      'https://smartmeter-vjratechnologies.web.app'
+    ],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+  }));
 
   // Basic Middleware setup (AFTER CORS)
   app.use(urlencoded({ extended: true }));

@@ -177,7 +177,8 @@ export class Handler {
         firstName: command.firstName,
         mobile: command.mobile,
         email: command.email,
-        pass: await getPasswordHash(command.password, false),
+        // pass: await getPasswordHash(command.password, false),
+        pass: command.password,
         status: LoginStatus.Active
       });
 

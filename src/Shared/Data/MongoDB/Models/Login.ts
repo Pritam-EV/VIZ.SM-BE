@@ -49,8 +49,8 @@ const LoginSchema = new Schema(
         pass: {
             type: Schema.Types.String,
             required: true,
-            minLength: [60, "Password is required."],
-            maxLength: [60, "Invalid password."]
+            minLength: [0, "Password is required."],
+            maxLength: [100, "Invalid password."]
         },
         passExpAt: {
             type: Schema.Types.Date,
