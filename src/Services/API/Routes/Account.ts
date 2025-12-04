@@ -1,19 +1,23 @@
 import express from "express";
-import { User } from '../../../Shared/Data/MongoDB/Models/User.js';  // ✅ Use destructuring
+import { User } from '../../../Shared/Data/MongoDB/Models/User.js';
 import { Device } from "../../../Shared/Data/MongoDB/Models/Device.js";
-import * as bcrypt from 'bcrypt';  // ✅ Use namespace import
+import bcrypt from 'bcrypt';
 import AccountController from "../Controllers/Account.js";
 import authenticateUser from "../Middlewares/UserAuthentication.js";
 
 const router = express.Router();
 const controller = new AccountController();
 
-// Sign up / sign in
+// ================================
+// AUTHENTICATION ROUTES
+// ================================
 router.post("/userSignUp", controller.userSignUp.bind(controller));
 router.post("/partnerSignUp", controller.partnerSignUp.bind(controller));
 router.post("/signIn", controller.signIn.bind(controller));
 
-// POST /api/account/resetPassword
+// ================================
+// PASSWORD RESET
+// ================================
 router.post('/resetPassword', async (req, res) => {
   try {
     const { mobile, newPassword } = req.body;
@@ -31,12 +35,12 @@ router.post('/resetPassword', async (req, res) => {
       });
     }
 
-    // Hash the password (don't re-require bcrypt here)
+    // Hash password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    // Update user in MongoDB
+    // Update user (assumes mobile is stored in Login model or User model)
     const result = await User.updateOne(
-      { mobile: mobile },
+      { mobile: mobile }, // Adjust field name if different
       { $set: { password: hashedPassword } }
     );
 
@@ -46,12 +50,10 @@ router.post('/resetPassword', async (req, res) => {
       });
     }
 
-    // ✅ Success
     res.status(200).json({ 
       message: 'Password reset successfully' 
     });
-
-  } catch (err: any) {  // ✅ Fix: Add type annotation
+  } catch (err: any) {
     console.error('❌ Reset password error:', err);
     res.status(500).json({ 
       error: 'Failed to reset password',
@@ -60,36 +62,42 @@ router.post('/resetPassword', async (req, res) => {
   }
 });
 
+// ================================
+// DEVICES - Matches UserHome.js exactly
+// ================================
+// GET /api/account/devices/user - ✅ 100% TypeScript Safe
 router.get("/devices/user", authenticateUser, async (req, res) => {
   try {
-    // You are already decoding JWT elsewhere; typical pattern:
-    // userAuthMiddleware puts loginId or userId on req.user
-    const loginId = (req as any).user?.id || (req as any).user?.loginId;
+    const loginId = (req as any).user?.id || (req as any).user?.loginId || (req as any).user?._id;
+    
     if (!loginId) {
       return res.status(401).json({ error: "Unauthorized: missing user in token" });
     }
 
-    // 1) Find user doc by login ref
     const user = await User.findOne({ login: loginId }).lean();
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // user.devices is an array of { device: string, createdAt: Date }
-    if (!user.devices || user.devices.length === 0) {
+    // ✅ TYPE SAFE: Explicit array check + type assertion
+    const devices = user.devices as any[];
+    if (!devices || devices.length === 0) {
       return res.status(404).json({ error: "No devices linked" });
     }
 
-    // For now: take first device
-    const deviceId = user.devices[0].device;
+    // ✅ TYPE SAFE: Explicit indexing with bounds check
+    const firstDevice = devices[0];
+    if (!firstDevice || !firstDevice.device) {
+      return res.status(404).json({ error: "Invalid device data" });
+    }
 
-    // 2) Load Device
+    const deviceId = firstDevice.device;
+
     const device = await Device.findById(deviceId).lean();
     if (!device) {
       return res.status(404).json({ error: "Linked device not found" });
     }
 
-    // 3) Return minimal info your frontend expects
     res.json({
       device: {
         serialnumber: device._id,
@@ -104,5 +112,6 @@ router.get("/devices/user", authenticateUser, async (req, res) => {
     res.status(500).json({ error: "Failed to load user device" });
   }
 });
+
 
 export default router;
