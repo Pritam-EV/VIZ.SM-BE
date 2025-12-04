@@ -1,8 +1,8 @@
 import "./Config/LoadEnv.js"; // Must be at first line
 import configureMongoDb from "./Config/DatabaseConfigs.js";
-// import configureMqttAsync from "./Config/MqttConfigs.js"
+import configureMqttAsync from "./Config/MqttConfigs.js"
 import getApp from "./app.js";
-// import MqttService from "./Services/Mqtt/Service.js";
+import MqttService from "./Services/Mqtt/Service.js";
 
 // Application entry point
 console.info("Starting application ...");
