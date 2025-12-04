@@ -3,14 +3,16 @@ import cors from 'cors';
 import corsMiddleware from "./Services/API/Middlewares/Cors.js";
 import errorMiddleware from "./Services/API/Middlewares/ErrorHandler.js";
 import requestTrackingMiddleware from "./Services/API/Middlewares/RequestTracking.js";
-// import userAuthMiddleware from "./Services/API/Middlewares/UserAuthentication.js";
+import userAuthMiddleware from "./Services/API/Middlewares/UserAuthentication.js";
 import LocalEnvVars from "./Shared/Common/Models/LocalEnvVars.js"; 
 import accountRouter from "./Services/API/Routes/Account.js";
 import baseRouter from "./Services/API/Routes/Base.js";
+import userRouter from "./Services/API/Routes/User.js";
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
-dotenv.config();
+
+// dotenv.config();
 
 // Load keys from files
 const privateKeyPath = process.env.JWT_SECRET_PATH || './keys/private_key.pem';
@@ -52,9 +54,12 @@ export default function buildApp() {
   // Routes
   app.use("/api/v1/account", accountRouter);
   app.use('/api/account', accountRouter);
+  app.use("/api/v1/user", userAuthMiddleware, userRouter);
+    app.use("/api/user", userAuthMiddleware, userRouter);
   app.use("/api/v1", baseRouter);
   app.use('/api', baseRouter);
   app.use("", baseRouter);
+
 
   // Error handling (at the end)
   app.use(errorMiddleware);
