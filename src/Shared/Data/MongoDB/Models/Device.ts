@@ -159,7 +159,7 @@ const DeviceSchema = new Schema(
             required: true,
             trim: true,
             uppercase: true,
-            minLength: 10,
+            minLength: 7,
             maxLength: 20,
             // unique: true, // implicit
             immutable: true

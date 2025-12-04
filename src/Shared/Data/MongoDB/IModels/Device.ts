@@ -27,6 +27,10 @@ export interface IDevice extends IElectricState /*, IModelTimeStamps, IPartnerLi
     reason?: string;
 }
 
+export interface IDeviceLink {
+    device: string | IDevice;
+}
+
 interface IMeterState {
     status: boolean;
     uptime: number;
