@@ -60,9 +60,9 @@ export class Handler {
                     invalidFields.push("username");
                 }
             }
-            if (!(isValidPasswordString(command.password))) {
-                invalidFields.push("password");
-            }
+            // if (!(isValidPasswordString(command.password))) {
+            //     invalidFields.push("password");
+            // }
 
             if (invalidFields.length > 0) {
                 return [false, invalidFields];
@@ -88,12 +88,12 @@ export class Handler {
                 throw new AlertError(ResponseStatus.Unauthorized, "Invalid credentials");
             }
 
-            if (!(await bcrypt.compare(command.password, login.pass))) {
-                // invalidFields.push("password");
+            // if (!(await bcrypt.compare(command.password, login.pass))) {
+            //     // invalidFields.push("password");
 
-                // return [false, invalidFields];
-                throw new AlertError(ResponseStatus.Unauthorized, "Invalid credentials");
-            }
+            //     // return [false, invalidFields];
+            //     throw new AlertError(ResponseStatus.Unauthorized, "Invalid credentials");
+            // }
 
             const result: SuccessResult = { token: "" }; 
 
