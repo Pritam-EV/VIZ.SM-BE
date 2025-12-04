@@ -68,7 +68,7 @@ router.post('/resetPassword', async (req, res) => {
 // GET /api/account/devices/user - ✅ 100% TypeScript Safe
 router.get("/devices/user", authenticateUser, async (req, res) => {
   try {
-    const loginId = (req as any).user?.id || (req as any).user?.loginId || (req as any).user?._id;
+    const loginId = (req as any).customContext?.user?.id;
     
     if (!loginId) {
       return res.status(401).json({ error: "Unauthorized: missing user in token" });
