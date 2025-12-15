@@ -1,10 +1,11 @@
 import express from "express";
 import { User } from '../../../Shared/Data/MongoDB/Models/User.js';
+import { Partner } from "../../../Shared/Data/MongoDB/Models/Partner.js";
 import { Device } from "../../../Shared/Data/MongoDB/Models/Device.js";
 import bcrypt from 'bcrypt';
 import AccountController from "../Controllers/Account.js";
 import authenticateUser from "../Middlewares/UserAuthentication.js";
-
+import { Login } from "../../../Shared/Data/MongoDB/Models/Login.js";
 const router = express.Router();
 const controller = new AccountController();
 
@@ -112,6 +113,104 @@ router.get("/devices/user", authenticateUser, async (req, res) => {
     res.status(500).json({ error: "Failed to load user device" });
   }
 });
+
+// ================================
+// PROFILE ROUTES
+// ================================
+
+// GET /api/account/profile
+// GET /api/account/profile
+router.get("/profile", authenticateUser, async (req, res) => {
+  try {
+    const loginId = (req as any).customContext?.user?.id;
+
+    if (!loginId) {
+      return res.status(401).json({ error: "Unauthorized: missing user in token" });
+    }
+
+    // 🔹 Login document for name / mobile / email
+    const loginDoc = await Login.findById(loginId).lean();
+
+    if (!loginDoc) {
+      return res.status(404).json({ error: "User profile not found" });
+    }
+
+    // 🔹 Check if this login has a partner record
+    const partnerDoc = await Partner.findOne({ login: loginId }).lean();
+    const hasPartner = !!partnerDoc;
+
+    // Shape the data as FE expects
+    return res.json({
+      user: {
+        firstName: loginDoc.firstName || loginDoc.firstName || "",
+        name:       loginDoc.firstName || loginDoc.firstName || "",
+        mobile:     loginDoc.mobile,
+        phone:      loginDoc.mobile,
+        email:      loginDoc.email || "",
+      },
+      hasPartner,   // 👈 FE will use this
+    });
+  } catch (err: any) {
+    console.error("❌ /api/account/profile GET error:", err);
+    return res.status(500).json({
+      error: "Failed to load profile",
+      details: err?.message || "Unknown error",
+    });
+  }
+});
+
+
+// PUT /api/account/profile
+router.put("/profile", authenticateUser, async (req, res) => {
+  try {
+    const loginId = (req as any).customContext?.user?.id;
+
+    if (!loginId) {
+      return res.status(401).json({ error: "Unauthorized: missing user in token" });
+    }
+
+    const { name, email } = req.body;
+
+    const update: any = {};
+
+    if (typeof name === "string" && name.trim()) {
+      // store as firstName (or name) depending on your Login schema
+      update.firstName = name.trim();
+    }
+
+    if (typeof email === "string") {
+      update.email = email.trim();
+    }
+
+    const updatedLogin = await Login.findByIdAndUpdate(
+      loginId,
+      { $set: update },
+      { new: true }
+    ).lean();
+
+    if (!updatedLogin) {
+      return res.status(404).json({ error: "User profile not found" });
+    }
+
+    return res.json({
+      message: "Profile updated successfully",
+      user: {
+        firstName: updatedLogin.firstName || updatedLogin.firstName || "",
+        name:       updatedLogin.firstName || updatedLogin.firstName || "",
+        mobile:     updatedLogin.mobile,
+        phone:      updatedLogin.mobile,
+        email:      updatedLogin.email || "",
+      },
+    });
+  } catch (err: any) {
+    console.error("❌ /api/account/profile PUT error:", err);
+    return res.status(500).json({
+      error: "Failed to update profile",
+      details: err?.message || "Unknown error",
+    });
+  }
+});
+
 
 
 export default router;

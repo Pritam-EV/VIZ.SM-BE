@@ -37,9 +37,9 @@ export default function buildApp() {
 
     // CORS: allow your frontend origins
     app.use(corsMiddleware);
-    // Middlewarehttps://smartmeter-vjratechnologies.web.app/
+    // Middlewarehttp://localhost:3000/
     app.use(cors({
-    origin: ['https://smartmeter-vjratechnologies.web.app/', 'http://localhost:3000'],
+    origin: ['http://localhost:3000/', 'http://localhost:3000'],
     credentials: true
     }));
 

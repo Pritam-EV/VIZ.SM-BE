@@ -8,6 +8,7 @@ import LocalEnvVars from "./Shared/Common/Models/LocalEnvVars.js";
 import accountRouter from "./Services/API/Routes/Account.js";
 import baseRouter from "./Services/API/Routes/Base.js";
 import userRouter from "./Services/API/Routes/User.js";
+import supportRoutes from "./Services/API/Routes/Support.js";
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
@@ -32,7 +33,7 @@ export default function buildApp() {
     origin: [
       'http://127.0.0.1:3000',
       'http://localhost:3000',
-      'https://smartmeter-vjratechnologies.web.app'
+      'http://localhost:3000'
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -51,14 +52,18 @@ export default function buildApp() {
   // ❌ REMOVE OR COMMENT OUT the custom corsMiddleware line
   // app.use(corsMiddleware);  // ← Delete this or comment it out
 
-  // Routes
-  app.use("/api/v1/account", accountRouter);
-  app.use('/api/account', accountRouter);
-  app.use("/api/v1/user", userAuthMiddleware, userRouter);
-    app.use("/api/user", userAuthMiddleware, userRouter);
-  app.use("/api/v1", baseRouter);
-  app.use('/api', baseRouter);
-  app.use("", baseRouter);
+// Routes
+app.use("/api/v1/account", accountRouter);
+app.use('/api/account', accountRouter);
+app.use("/api/v1/user", userAuthMiddleware, userRouter);
+
+// 🔹 Mount support routes BEFORE generic /api baseRouter
+app.use('/api/support', userAuthMiddleware, supportRoutes);
+
+app.use("/api/v1", baseRouter);
+app.use('/api', baseRouter);
+app.use("", baseRouter);
+
 
 
   // Error handling (at the end)

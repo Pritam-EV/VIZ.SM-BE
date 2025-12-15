@@ -41,6 +41,12 @@ export default async function authenticateUser(req: Request, res: Response, next
         (req as RequestWithUser).customContext.user = { id: decoded.sub, roles: decoded.roles, pIds: decoded.pIds as ([string, string?] | undefined) }; // ✅ Explicitly set id of the user
         (req as RequestWithUser).customContext.logger.addOrUpdateDiagnosticsData(new DiagnosticsContextMemberParam("userId", decoded.sub));
         
+        // 🔥 ADD THESE LINES ↓↓↓
+        // Mirror user info onto the plain req object for routes that use (req as any).userId / .user
+        (req as any).userId = decoded.sub;
+        (req as any).user = (req as RequestWithUser).customContext.user;
+        // 🔥 ADD THESE LINES ↑↑↑
+
         next();
     });
 }
