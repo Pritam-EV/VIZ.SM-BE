@@ -32,8 +32,8 @@ export default function buildApp() {
   app.use(cors({
     origin: [
       'http://127.0.0.1:3000',
-      'http://localhost:3000',
-      'http://localhost:3000'
+      'http://https://smartmeter-vjratechnologies.web.app',
+      'http://https://smartmeter-vjratechnologies.web.app'
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
