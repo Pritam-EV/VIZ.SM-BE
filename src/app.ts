@@ -33,7 +33,8 @@ export default function buildApp() {
     origin: [
       'http://127.0.0.1:3000',
       'http://localhost:3000',
-      'https://smartmeter-vjratechnologies.web.app'
+      'https://smartmeter-vjratechnologies.web.app',
+      'https://smeter.vjratechnologies.com'
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
