@@ -44,7 +44,7 @@ const PaymentSchema = new Schema(
             type: Schema.Types.String,
             required: true
         },
-        isSuccessFul: {
+        isSuccessful: {
             type: Schema.Types.Boolean,
             default: false,
             immutable: true
@@ -53,7 +53,7 @@ const PaymentSchema = new Schema(
             type: Schema.Types.Boolean,
             required: true,
             default: false
-            //set: value => this.isSuccessFul === true && value === true
+            //set: value => this.isSuccessful === true && value === true
         },
         signature: {
             type: Schema.Types.String,
@@ -84,7 +84,7 @@ const PaymentSchema = new Schema(
     }
 );
 
-export type PaymentType = InferSchemaType<typeof PaymentSchema>;
+export type TPayment = InferSchemaType<typeof PaymentSchema>;
 
 // export const Payment = model<IPayment>("Payment", PaymentSchema);
 export const Payment = model("Payment", PaymentSchema);

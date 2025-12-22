@@ -1,9 +1,10 @@
 import { Schema, model, type InferSchemaType } from "mongoose";
-import { LoginStatus } from "../../../Common/Enums/Member.js";
 import { AadharCardNumberRegExp, EmailRegExp, IndianMobileRegExp, PanCardNumberRegExp } from "../../../Common/Constants/RegixExpressions.js";
+import { LoginStatus } from "../../../Common/Enums/Member.js";
 import { addMonths } from "../../../Common/Helpers/DateHelpers.js";
-// import type { ILogin } from "../IModels/Member.js";
+import type { ILogin } from "../IModels/Member.js";
 
+export type { ILogin };
 export { LoginStatus };
 
 // const LoginSchema = new Schema<ILogin>(
@@ -49,8 +50,8 @@ const LoginSchema = new Schema(
         pass: {
             type: Schema.Types.String,
             required: true,
-            minLength: [0, "Password is required."],
-            maxLength: [100, "Invalid password."]
+            minLength: [60, "Password is required."],
+            maxLength: [60, "Invalid password."]
         },
         passExpAt: {
             type: Schema.Types.Date,
@@ -91,7 +92,7 @@ const LoginSchema = new Schema(
     }
 );
 
-export type LoginType = InferSchemaType<typeof LoginSchema>;
+export type TLogin = InferSchemaType<typeof LoginSchema>;
 
 // export const Login = model<ILogin>("Login", LoginSchema);
 export const Login = model("Login", LoginSchema);

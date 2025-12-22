@@ -3,6 +3,7 @@ import { DeviceStatus } from "../../../Common/Enums/Device.js";
 import type { IDevice, IDeviceAddress, IDeviceAddressLine1, IDeviceAddressLine2, IElectricTelemetry, IMeterTelemetry } from "../IModels/Device.js";
 
 export type { IDevice, IDeviceAddress, IDeviceAddressLine1, IDeviceAddressLine2, IElectricTelemetry, IMeterTelemetry };
+export { DeviceStatus };
 
 const DeviceAddressLine1Schema = new Schema<IDeviceAddressLine1>(
     {
@@ -21,7 +22,7 @@ const DeviceAddressLine1Schema = new Schema<IDeviceAddressLine1>(
         building: {
             type: Schema.Types.String,
             required: true,
-            minLength: 5,
+            minLength: 1,
             maxLength: 25
         },
         society: {
@@ -194,10 +195,11 @@ const DeviceSchema = new Schema(
             min: [10, "Invalid rate"],
             default: 20
         },
+        /** Unit: Kilo Watt Hour (kWh) */
         pool: {
             type: Schema.Types.Number,
             required: true,
-            min: [0, "Negative pool balance is not allowed"],
+            min: [0, "Negative energy pool balance is not allowed"],
             default: 0
         },
         totalEnergy: {
@@ -224,7 +226,7 @@ const DeviceSchema = new Schema(
     }
 );
 
-export type DeviceType = InferSchemaType<typeof DeviceSchema>;
+export type TDevice = InferSchemaType<typeof DeviceSchema>;
 
 // export const Device = model<IDevice>("Device", DeviceSchema);
 export const Device = model("Device", DeviceSchema);
@@ -303,7 +305,7 @@ const MeterTelemetrySchema = new Schema(
     }
 );
 
-export type MeterTelemetryType = InferSchemaType<typeof MeterTelemetrySchema>;
+export type TMeterTelemetry = InferSchemaType<typeof MeterTelemetrySchema>;
 
 // export const MeterTelemetry = model<IMeterTelemetry>("MeterTelemetry", MeterTelemetrySchema);
 export const MeterTelemetry = model("MeterTelemetry", MeterTelemetrySchema);

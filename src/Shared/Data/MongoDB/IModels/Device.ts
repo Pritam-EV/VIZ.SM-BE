@@ -21,7 +21,9 @@ export interface IDevice extends IElectricState /*, IModelTimeStamps, IPartnerLi
     consumerId: string;
     address: IDeviceAddress;
     status: DeviceStatus;
+    /** Unit: INR per Kilo Watt Hour (₹/kWh) */
     rate: number;
+    /** Unit: Kilo Watt Hour (kWh) */
     pool: number;
     telemetry?: IElectricTelemetry;
     reason?: string;

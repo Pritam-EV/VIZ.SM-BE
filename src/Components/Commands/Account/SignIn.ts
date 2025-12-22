@@ -7,7 +7,7 @@ import { ProfileFlags } from "../../../Shared/Common/Enums/Member.js";
 import LocalEnvVars from "../../../Shared/Common/Models/LocalEnvVars.js";
 import type Logger from "../../../Shared/Common/Models/Logging.js";
 import type { ILoginTokenPayload } from "../../../Shared/Common/Types/ApiTypes.js";
-import { Login, LoginStatus, type LoginType } from "../../../Shared/Data/MongoDB/Models/Login.js";
+import { Login, LoginStatus, type TLogin } from "../../../Shared/Data/MongoDB/Models/Login.js";
 import { Partner, PartnerStatus } from "../../../Shared/Data/MongoDB/Models/Partner.js";
 import { User, UserStatus } from "../../../Shared/Data/MongoDB/Models/User.js";
 import { isValidEmail, isValidMobileNumber, isValidPasswordString } from "../../Helpers/LoginHelpers.js";
@@ -44,7 +44,7 @@ export class Handler {
     public async handle(command: Command): Promise<TResult> {
         try {
             const invalidFields: string[] = [];
-            const loginFindOneOrQueryFilter: FilterQuery<LoginType>[] = [];
+            const loginFindOneOrQueryFilter: FilterQuery<TLogin>[] = [];
 
             if (typeof command.mobileOrEmail !== "string") {
                 invalidFields.push("username");

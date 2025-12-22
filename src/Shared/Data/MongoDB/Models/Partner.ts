@@ -27,7 +27,7 @@ const PartnerSchema = new Schema(
     }
 );
 
-export type PartnerType = InferSchemaType<typeof PartnerSchema>;
+export type TPartner = InferSchemaType<typeof PartnerSchema>;
 
 // export const Partner = model<IPartner>("Partner", PartnerSchema);
 export const Partner = model("Partner", PartnerSchema);

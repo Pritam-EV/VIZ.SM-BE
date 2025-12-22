@@ -1,3 +1,5 @@
+import type { DeviceTransactionSource, WalletTransactionDestination, WalletTransactionSource } from "../../../Common/Enums/Transaction.js";
+import type { IDeviceLink } from "./Device.js";
 import type { IModel } from "./ModelBase.js";
 
 /*
@@ -23,8 +25,28 @@ export interface IPayment extends IModel<string> {
     currency: string;
     initiatedAt: Date;
     status: string;
-    isSuccessFul: boolean;
+    isSuccessful: boolean;
     isUsed: boolean;
     signature: string;
     orderedAt: Date;
+}
+
+export interface IDeviceTransaction extends IDeviceLink {
+    /** Unit: Kilo Watt Hour (kWh) */
+    energy: number;
+    rate: number;
+    amount: number;
+    currency: string;
+    source: DeviceTransactionSource;
+    reversedAt?: Date;
+}
+
+export interface IWalletTransaction {
+    amount: number;
+    currency: string;
+    source: WalletTransactionSource;
+    creditedTo: WalletTransactionDestination;
+    summary: string;
+    txnId?: string;
+    refundedAt?: Date;
 }

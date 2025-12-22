@@ -1,4 +1,4 @@
-// import { Schema } from 'mongoose';
+import { Schema } from 'mongoose';
 import type { LoginStatus, PartnerStatus, UserStatus } from "../../../Common/Enums/Member.js";
 import type { IDeviceLink } from './Device.js';
 // import type { IModel, IModelTimeStamps } from "./ModelBase.js";
@@ -33,13 +33,17 @@ interface ILoginLink {
 */
 
 export interface IUserDevice extends IDeviceLink {
-    createdAt: Date;
+    linkedAt: Date;
 }
 
 export interface IUser /* extends ILoginLink, IModel, IModelTimeStamps */ {
     status: UserStatus;
     balance: number;
     devices?: IUserDevice[];
+}
+
+export interface IUserLink {
+    user: Schema.Types.ObjectId | IUser;
 }
 
 export interface IPartner /* extends ILoginLink, IModel, IModelTimeStamps */ {

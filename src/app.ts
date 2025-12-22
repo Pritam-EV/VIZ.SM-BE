@@ -7,6 +7,7 @@ import userAuthMiddleware from "./Services/API/Middlewares/UserAuthentication.js
 import LocalEnvVars from "./Shared/Common/Models/LocalEnvVars.js"; 
 import accountRouter from "./Services/API/Routes/Account.js";
 import baseRouter from "./Services/API/Routes/Base.js";
+import authRouter from "./Services/API/Routes/Auth.js";
 import userRouter from "./Services/API/Routes/User.js";
 import supportRoutes from "./Services/API/Routes/Support.js";
 import dotenv from 'dotenv';
@@ -56,6 +57,7 @@ export default function buildApp() {
 // Routes
 app.use("/api/v1/account", accountRouter);
 app.use('/api/account', accountRouter);
+app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/user", userAuthMiddleware, userRouter);
 
 // 🔹 Mount support routes BEFORE generic /api baseRouter

@@ -11,11 +11,10 @@ const UserDeviceSchema = new Schema<IUserDevice>(
         device: {
             type: Schema.Types.String,
             required: true,
-            unique: true,
             ref: "Device",
             immutable: true
         },
-        createdAt: {
+        linkedAt: {
             type: Schema.Types.Date,
             required: true,
             default: Date.now,
@@ -27,7 +26,7 @@ const UserDeviceSchema = new Schema<IUserDevice>(
     }
 );
 
-export type UserDeviceType = InferSchemaType<typeof UserDeviceSchema>;
+export type TUserDevice = InferSchemaType<typeof UserDeviceSchema>;
 
 // const UserSchema = new Schema<IUser>(
 const UserSchema = new Schema(
@@ -67,7 +66,7 @@ const UserSchema = new Schema(
     }
 );
 
-export type UserType = InferSchemaType<typeof UserSchema>;
+export type TUser = InferSchemaType<typeof UserSchema>;
 
 // export const User = model<IUser>("User", UserSchema);
 export const User = model("User", UserSchema);

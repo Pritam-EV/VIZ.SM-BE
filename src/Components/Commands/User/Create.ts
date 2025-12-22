@@ -3,7 +3,7 @@ import { AlertError, HttpError } from "../../../Shared/Common/CustomErrors/HttpE
 import { ErrorAlertTypes } from "../../../Shared/Common/Enums/AlertTypes.js";
 import { ResponseStatus } from "../../../Shared/Common/Enums/Http.js";
 import type Logger from "../../../Shared/Common/Models/Logging.js";
-import { Login, LoginStatus, type LoginType } from "../../../Shared/Data/MongoDB/Models/Login.js";
+import { Login, LoginStatus, type TLogin } from "../../../Shared/Data/MongoDB/Models/Login.js";
 import { User, UserStatus } from "../../../Shared/Data/MongoDB/Models/User.js";
 import { getPasswordHash } from "../../Helpers/LoginHelpers.js";
 
@@ -73,7 +73,7 @@ export class Handler {
       }
 
       // Check for existing login conflicts
-      const loginFindOneFilterOrQuery: FilterQuery<LoginType>[] = [
+      const loginFindOneFilterOrQuery: FilterQuery<TLogin>[] = [
         { mobile: newLogin.mobile },
         { email: newLogin.email }
       ];
