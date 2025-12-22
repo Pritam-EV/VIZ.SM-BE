@@ -14,13 +14,24 @@ export default async function authenticateUser(
 ) {
   // ✅ 1. ALLOW CORS PREFLIGHT (CRITICAL FIX)
 if (req.method === "OPTIONS") {
-  res.setHeader("Access-Control-Allow-Origin", req.headers.origin || "https://smartmeter-vjratechnologies.web.app");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, Accept");
+  res.setHeader(
+    "Access-Control-Allow-Origin",
+    req.headers.origin || "https://smartmeter-vjratechnologies.web.app"
+  );
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+  );
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization, Accept"
+  );
   res.setHeader("Access-Control-Allow-Credentials", "true");
   res.setHeader("Access-Control-Max-Age", "3600");
-  return res.sendStatus(200);
+
+  return res.sendStatus(200); // <- important: don't call next()
 }
+
 
 
   const authHeader = req.headers.authorization;
