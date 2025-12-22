@@ -41,8 +41,7 @@ export default function buildApp() {
     allowedHeaders: ['Content-Type', 'Authorization'],
   }));
 
-  // ✅ Explicit OPTIONS handler (important for PATCH)
-  app.options('*', cors());
+
 
   // Body parsers
   app.use(express.json());
