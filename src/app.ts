@@ -33,7 +33,6 @@ export default function buildApp() {
     origin: [
       'http://127.0.0.1:3000',
       'http://localhost:3000',
-      'https://smartmeter-vjratechnologies.web.app',
       'https://smeter.vjratechnologies.com'
     ],
     credentials: true,
@@ -57,7 +56,7 @@ export default function buildApp() {
   app.use("/api/v1/auth", authRouter);
 
   app.use("/api/v1/user", userAuthMiddleware, userRouter);
-
+ app.use("/api/v1/user/linkdevice", userAuthMiddleware, userRouter);
   app.use('/api/support', userAuthMiddleware, supportRoutes);
 
   app.use("/api/v1", baseRouter);
