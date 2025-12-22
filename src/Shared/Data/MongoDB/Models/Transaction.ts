@@ -1,6 +1,6 @@
 import { Schema, model, type InferSchemaType } from "mongoose";
 import { DeviceTransactionSource, WalletTransactionDestination, WalletTransactionSource } from "../../../Common/Enums/Transaction.js";
-import type { IDeviceTransaction, IWalletTransaction } from "../IModels//Transaction.js";
+import type { IDeviceTransaction, IWalletTransaction } from "../IModels/Transaction.js";
 
 export type { IDeviceTransaction, IWalletTransaction };
 export { DeviceTransactionSource, WalletTransactionDestination, WalletTransactionSource };

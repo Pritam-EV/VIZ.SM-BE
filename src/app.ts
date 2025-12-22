@@ -1,6 +1,5 @@
 import express, { json, urlencoded } from "express";
 import cors from 'cors';
-import corsMiddleware from "./Services/API/Middlewares/Cors.js";
 import errorMiddleware from "./Services/API/Middlewares/ErrorHandler.js";
 import requestTrackingMiddleware from "./Services/API/Middlewares/RequestTracking.js";
 import userAuthMiddleware from "./Services/API/Middlewares/UserAuthentication.js";
@@ -29,7 +28,7 @@ LocalEnvVars.initialize(privateKey, publicKey);
 export default function buildApp() {
   const app = express();
 
-  // ✅ MOVE CORS TO THE TOP (before any other middleware)
+  // ✅ CORS — SINGLE SOURCE OF TRUTH
   app.use(cors({
     origin: [
       'http://127.0.0.1:3000',
@@ -38,48 +37,37 @@ export default function buildApp() {
       'https://smeter.vjratechnologies.com'
     ],
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   }));
 
-  // Basic Middleware setup (AFTER CORS)
-  app.use(urlencoded({ extended: true }));
-  app.use(json());
+  // ✅ Explicit OPTIONS handler (important for PATCH)
+  app.options('*', cors());
+
+  // Body parsers
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
   // Track request
   app.use(requestTrackingMiddleware);
 
-  // ❌ REMOVE OR COMMENT OUT the custom corsMiddleware line
-  // app.use(corsMiddleware);  // ← Delete this or comment it out
+  // Routes
+  app.use("/api/v1/account", accountRouter);
+  app.use("/api/account", accountRouter);
 
-// Routes
-app.use("/api/v1/account", accountRouter);
-app.use('/api/account', accountRouter);
-app.use("/api/v1/auth", authRouter);
-app.use("/api/v1/user", userAuthMiddleware, userRouter);
+  app.use("/api/v1/auth", authRouter);
 
-// 🔹 Mount support routes BEFORE generic /api baseRouter
-app.use('/api/support', userAuthMiddleware, supportRoutes);
+  app.use("/api/v1/user", userAuthMiddleware, userRouter);
 
-app.use("/api/v1", baseRouter);
-app.use('/api', baseRouter);
-app.use("", baseRouter);
+  app.use('/api/support', userAuthMiddleware, supportRoutes);
 
+  app.use("/api/v1", baseRouter);
+  app.use("/api", baseRouter);
+  app.use("", baseRouter);
 
-
-  // Error handling (at the end)
+  // Error handling
   app.use(errorMiddleware);
-
-  // Unhandled errors
-  process.on('uncaughtException', (err) => {
-    console.error('❌ Uncaught Exception:', err);
-  });
-
-  process.on('unhandledRejection', (reason, promise) => {
-    console.error('❌ Unhandled Rejection:', promise, 'reason:', reason);
-  });
 
   return app;
 }
+
