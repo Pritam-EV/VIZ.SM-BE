@@ -32,6 +32,9 @@ export default async function authenticateUser(
   }
 
   const reqWithUser = req as RequestWithUser;
+console.log("🔍 UserAuth middleware hit:", req.method, req.path);
+console.log("🔍 customContext exists:", !!reqWithUser.customContext);
+console.log("🔍 logger exists:", !!reqWithUser.customContext?.logger);
 
   const authHeader = req.headers.authorization;
   if (!authHeader) {

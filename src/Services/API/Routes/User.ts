@@ -9,6 +9,9 @@ const userController = new UserController();
 
 userRouter.get("/home", homeController.getUserHomePageDetails);
 
+// ✅ ADD THIS LINE (POST support)
+userRouter.post("/linkdevice", userController.linkUserDevice);
+
 userRouter.patch("/linkdevice", userController.linkUserDevice);
 
 userRouter.patch("/unlinkdevices", userController.unlinkUserDevices);
