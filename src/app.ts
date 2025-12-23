@@ -56,7 +56,7 @@ export default function buildApp() {
   app.use("/api/v1/auth", authRouter);
 
   app.use("/api/v1/user", userAuthMiddleware, userRouter);
- app.use("/api/v1/user/linkdevice", userAuthMiddleware, userRouter);
+
   app.use('/api/support', userAuthMiddleware, supportRoutes);
 
   app.use("/api/v1", baseRouter);

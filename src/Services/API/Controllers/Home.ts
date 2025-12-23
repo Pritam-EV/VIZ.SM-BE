@@ -63,6 +63,7 @@ export default class HomeController {
           devices = deviceDocs.map((d) => ({
             id: d._id,
             pool: d.pool ?? 0,
+            rate: d.rate ?? 10.0,        // ✅ LIVE RATE from Device schema!
             isActive: d.status === "active",
           }));
         }
