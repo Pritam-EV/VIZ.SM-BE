@@ -127,6 +127,14 @@ export class Handler {
                 { lean: true }
             ).lean().exec();
 
+            this.#logger.info("DEBUG DEVICE FOUND", {
+                deviceId: device?._id,
+                deviceIdType: typeof device?._id
+                });
+
+
+            
+
             if (!device) {
                 return {
                     httpCode: ResponseStatus.NotFound,
@@ -174,6 +182,13 @@ export class Handler {
                     lean: true
                 }
             );
+
+            this.#logger.info("DEBUG USER LOOKUP", {
+                userId: command.userId,
+                deviceIdUsedInQuery: device._id,
+                userFound: !!user
+                });
+
 
             if (!user) {
                 return {
