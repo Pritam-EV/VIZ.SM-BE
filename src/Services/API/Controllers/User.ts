@@ -67,39 +67,63 @@ export default class UserController {
         }
     }
 
-    async topupUserDevice(req: Request, res: Response) {
-        verifyProfile(req as RequestWithUser, ProfileFlags.User);
-        if ((req as RequestWithUser).customContext.user.pIds?.length) {
-            const errorResult = await (new TopupUserDevice.Handler((req as RequestWithUser).customContext.logger)).handle(
-                new TopupUserDevice.Command(
-                    (req as RequestWithUser).customContext.user.pIds![0],
-                    req.body.deviceId,
-                    req.body.amount,
-                    req.body.rate,
-                    req.body.currency || "INR"
-                )
-            );
+async topupUserDevice(req: Request, res: Response) {
+    verifyProfile(req as RequestWithUser, ProfileFlags.User);
+    
+    // ✅ FIXED: Safe pId extraction + logging
+    const user = (req as RequestWithUser).customContext.user;
+    
+    // DEBUG LOGGING (remove after fix works)
+    console.log('🔍 TOPUP DEBUG:', {
+        pIds: user?.pIds,
+        pIdsLength: user?.pIds?.length,
+        deviceId: req.body.deviceId,
+        amount: req.body.amount,
+        rate: req.body.rate
+    });
+    
+    if (!user?.pIds?.length) {
+        (req as RequestWithLoggerOnly).customContext.logger.error("No user profile found", { userId: user?.id });
+        res.status(ResponseStatus.BadRequest).json(new AlertsResponse({
+            type: "danger",  // ✅ FIXED: Correct AlertTypes enum!
+            message: "User profile not found"
+        } as any));  // ✅ Type assertion for safety
+        return;
+    }
 
-            if (errorResult) {
-                (req as RequestWithLoggerOnly).customContext.logger.error("Failed to topup user device", { errorResult: errorResult });
-                if ("alert" in errorResult && errorResult.alert) {
-                    res.status(errorResult.httpCode).json(new AlertsResponse(errorResult.alert));
-                }
-                else if (errorResult.doExposeMessage) {
-                    res.status(errorResult.httpCode).json(new BaseMessageResponse(errorResult.message));
-                }
-                else {
-                    res.status(errorResult.httpCode).end();
-                }
-            }
-            else {
-                res.status(ResponseStatus.NoContent).end();
-            }
+    const profileId = user.pIds[0];
+
+    const errorResult = await (new TopupUserDevice.Handler((req as RequestWithUser).customContext.logger)).handle(
+        new TopupUserDevice.Command(
+            profileId,
+            req.body.deviceId,
+            req.body.amount,
+            req.body.rate,
+            req.body.currency || "INR"
+        )
+    );
+
+    if (errorResult) {
+        (req as RequestWithLoggerOnly).customContext.logger.error("Failed to topup user device", { 
+            errorResult: errorResult,
+            profileId,
+            deviceId: req.body.deviceId
+        });
+        if ("alert" in errorResult && errorResult.alert) {
+            res.status(errorResult.httpCode).json(new AlertsResponse(errorResult.alert));
+        }
+        else if (errorResult.doExposeMessage) {
+            res.status(errorResult.httpCode).json(new BaseMessageResponse(errorResult.message));
         }
         else {
-            res.status(ResponseStatus.BadRequest).end();
+            res.status(errorResult.httpCode).end();
         }
     }
+    else {
+        res.status(ResponseStatus.NoContent).end();
+    }
+}
+
 
     async userDeviceTopupHistory(req: Request, res: Response) {
         verifyProfile(req as RequestWithUser, ProfileFlags.User);
