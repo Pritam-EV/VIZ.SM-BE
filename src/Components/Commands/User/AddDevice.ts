@@ -74,7 +74,7 @@ export class Handler {
                 { lean: true }
             ).lean().exec();
 
-            if (!device) {
+            if (!device?._id) {
                 return {
                     httpCode: ResponseStatus.NotFound,
                     message: "Device not found",
@@ -88,7 +88,7 @@ export class Handler {
                 };
             }
 
-            const newUserDevice: IUserDevice = {
+            const newUserDevice = {
                 device: device._id,
                 linkedAt: new Date()
             };
@@ -96,11 +96,11 @@ export class Handler {
                 {
                     _id: command.userId,
                     status: UserStatus.Active,
-                    "devices.device": { $ne: newUserDevice.device }
+                    "devices.device": { $ne: newUserDevice.device}
                 },
                 {
                     $push: {
-                        devices: { newUserDevice }
+                        devices: newUserDevice
                     }
                 }
             ).exec();

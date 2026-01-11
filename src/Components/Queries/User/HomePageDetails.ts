@@ -80,9 +80,9 @@ export class Handler {
                 result.devices = user.devices.map(
                     dd => {
                         return {
-                            id: (dd.device as IDevice)._id,
-                            isActive: (dd.device as IDevice).status == DeviceStatus.Active,
-                            pool: (dd.device as IDevice).pool
+                            id: (dd.device as unknown as IDevice)._id,
+                            isActive: (dd.device as unknown as IDevice).status == DeviceStatus.Active,
+                            pool: (dd.device as unknown as IDevice).pool
                         } as IDeviceDetails;
                     }
                 );

@@ -43,7 +43,7 @@ const DeviceTransactionSchema = new Schema(
             type: Schema.Types.Number,
             required: true,
             enum: Object.values(DeviceTransactionSource),
-            default: DeviceTransactionSource.Unknown,
+            //default: DeviceTransactionSource.Unknown,
             immutable: true
         },
         reversedAt: {
