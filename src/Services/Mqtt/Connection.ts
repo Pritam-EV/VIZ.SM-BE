@@ -36,11 +36,11 @@ export default class MqttConnection {
     public static get client(): mqtt.MqttClient {
         if (!this.#client) {
             this.#client = mqtt.connect(
-                process.env.MQTT_BROKER_URL!,
+                process.env.MQTT_BROKER_URL,
                 {
                     protocol: "wss",
-                    username: process.env.MQTT_BROKER_USERNAME!,
-                    password: process.env.MQTT_BROKER_PASSWORD!,
+                    username: process.env.MQTT_BROKER_USERNAME,
+                    password: process.env.MQTT_BROKER_PASSWORD,
                     rejectUnauthorized: false, // TODO: Not recommended for production. Use secure connection.
                     clientId: process.env.MQTT_CLIENT_ID!,
                     clean: process.env.MQTT_CLIENT_ID ? false : true,

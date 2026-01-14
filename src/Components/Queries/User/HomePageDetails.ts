@@ -1,7 +1,8 @@
-import { HttpError } from "../../../Shared/Common/CustomErrors/HttpErrors.js";
+import { isObjectIdOrHexString } from "mongoose";
 import { DeviceStatus } from "../../../Shared/Common/Enums/Device.js";
 import { ResponseStatus } from "../../../Shared/Common/Enums/Http.js";
 import type Logger from "../../../Shared/Common/Models/Logging.js";
+import { Alert, AlertTypes } from "../../../Shared/Common/Models/Responses.js";
 import type { IDevice } from "../../../Shared/Data/MongoDB/IModels/Device.js";
 import type { ILogin } from "../../../Shared/Data/MongoDB/IModels/Member.js";
 import { User } from "../../../Shared/Data/MongoDB/Models/User.js";
@@ -18,12 +19,19 @@ interface IDeviceDetails {
     id: string;
     isActive: boolean;
     pool: number;
+    totalEnergy: number;
 }
 
 interface IResult {
     firstName: string;
     balance: number;
     devices?: IDeviceDetails[];
+}
+
+interface IErrorResult {
+    httpCode: ResponseStatus;
+    message?: string;
+    alert?: Alert;
 }
 
 export class Handler {
@@ -33,11 +41,29 @@ export class Handler {
         this.#logger = logger;
     }
 
-    public async handle(query: Query): Promise<IResult> {
+    public async handle(query: Query): Promise<[true, IResult] | [false, IErrorResult]> {
         try {
             if (!query.userId) {
-                throw new HttpError(ResponseStatus.BadRequest, "User required");
+                return [
+                    false,
+                    {
+                        httpCode: ResponseStatus.Unauthorized,
+                        message: "UserId required",
+                        alert: new Alert("Please sign up", AlertTypes.Critical)
+                    }
+                ];
             }
+            if (!isObjectIdOrHexString(query.userId)) {
+                return [
+                    false,
+                    {
+                        httpCode: ResponseStatus.Unauthorized,
+                        message: "Invalid userId",
+                        alert: new Alert("Please sign up", AlertTypes.Critical)
+                    }
+                ];
+            }
+
             const user = await User.findById(
                 query.userId,
                 {
@@ -52,7 +78,8 @@ export class Handler {
                             select: {
                                 _id: 1,
                                 status: 1,
-                                pool: 1
+                                energyLimit: 1,
+                                totalEnergy: 1
                             },
                             options: { lean: true }
                         },
@@ -69,7 +96,14 @@ export class Handler {
             ).lean().exec();
 
             if (!user) {
-                throw new HttpError(ResponseStatus.NotFound, "User not found");
+                return [
+                    false,
+                    {
+                        httpCode: ResponseStatus.NotFound,
+                        message: "User not found",
+                        alert: new Alert("Please sign up", AlertTypes.Critical)
+                    }
+                ];
             }
 
             const result: IResult = {
@@ -78,25 +112,29 @@ export class Handler {
             }
             if (user.devices && user.devices.length > 0) {
                 result.devices = user.devices.map(
-                    dd => {
+                    ud => {
                         return {
-                            id: (dd.device as unknown as IDevice)._id,
-                            isActive: (dd.device as unknown as IDevice).status == DeviceStatus.Active,
-                            pool: (dd.device as unknown as IDevice).pool
+                            id: (ud.device as IDevice)._id,
+                            isActive: (ud.device as IDevice).status == DeviceStatus.Active,
+                            pool: (ud.device as IDevice).energyLimit - (ud.device as IDevice).totalEnergy,
+                            totalEnergy: (ud.device as IDevice).totalEnergy
                         } as IDeviceDetails;
                     }
                 );
             }
 
-            return result;
+            return [true, result];
         }
         catch (error) {
-            if (error instanceof HttpError) {
-                throw error;
-            }
-            this.#logger.error(error as Error, "Error occured while fetching details for user home page.", { input: query });
+            this.#logger.error(error as Error, "Error occured while fetching details for user home page", { input: query });
 
-            throw new HttpError(500, "Something failed while fetching details for user home page.");
+            return [
+                false,
+                {
+                    httpCode: ResponseStatus.InternalServerError,
+                    message: "Something failed while fetching details for user home page"
+                }
+            ];
         }
     }
 }

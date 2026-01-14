@@ -2,6 +2,8 @@ import http from "http";
 import { ErrorAlertTypes } from "../Enums/AlertTypes.js"
 import { ResponseStatus } from "../Enums/Http.js";
 
+export { ErrorAlertTypes, ResponseStatus };
+
 interface IHttpError {
     statusCode: number;
     doExpose: boolean;

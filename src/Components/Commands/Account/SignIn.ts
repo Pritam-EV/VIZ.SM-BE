@@ -1,8 +1,8 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import type { FilterQuery } from "mongoose";
-import { AlertError, HttpError } from "../../../Shared/Common/CustomErrors/HttpErrors.js";
-import { ResponseStatus } from "../../../Shared/Common/Enums/Http.js";
+import { isValidEmail, isValidMobileNumber, isValidPasswordString } from "../../Helpers/LoginHelpers.js";
+import { AlertError, HttpError, ResponseStatus } from "../../../Shared/Common/CustomErrors/HttpErrors.js";
 import { ProfileFlags } from "../../../Shared/Common/Enums/Member.js";
 import LocalEnvVars from "../../../Shared/Common/Models/LocalEnvVars.js";
 import type Logger from "../../../Shared/Common/Models/Logging.js";
@@ -10,7 +10,6 @@ import type { ILoginTokenPayload } from "../../../Shared/Common/Types/ApiTypes.j
 import { Login, LoginStatus, type TLogin } from "../../../Shared/Data/MongoDB/Models/Login.js";
 import { Partner, PartnerStatus } from "../../../Shared/Data/MongoDB/Models/Partner.js";
 import { User, UserStatus } from "../../../Shared/Data/MongoDB/Models/User.js";
-import { isValidEmail, isValidMobileNumber, isValidPasswordString } from "../../Helpers/LoginHelpers.js";
 
 export class Command {
     mobileOrEmail: string;
@@ -60,9 +59,9 @@ export class Handler {
                     invalidFields.push("username");
                 }
             }
-            // if (!(isValidPasswordString(command.password))) {
-            //     invalidFields.push("password");
-            // }
+            if (!(isValidPasswordString(command.password))) {
+                invalidFields.push("password");
+            }
 
             if (invalidFields.length > 0) {
                 return [false, invalidFields];
@@ -88,12 +87,12 @@ export class Handler {
                 throw new AlertError(ResponseStatus.Unauthorized, "Invalid credentials");
             }
 
-            // if (!(await bcrypt.compare(command.password, login.pass))) {
-            //     // invalidFields.push("password");
+            if (!(await bcrypt.compare(command.password, login.pass))) {
+                // invalidFields.push("password");
 
-            //     // return [false, invalidFields];
-            //     throw new AlertError(ResponseStatus.Unauthorized, "Invalid credentials");
-            // }
+                // return [false, invalidFields];
+                throw new AlertError(ResponseStatus.Unauthorized, "Invalid credentials");
+            }
 
             const result: SuccessResult = { token: "" }; 
 
@@ -149,9 +148,9 @@ export class Handler {
             if (error instanceof HttpError) {
                 throw error;
             }
-            this.#logger.error(error as Error, "Error occured while creating a user.", { input: command });
+            this.#logger.error(error as Error, "Error occured while creating a user", { input: command });
 
-            throw new HttpError(500, "Something failed while creating a user account.");
+            throw new HttpError(ResponseStatus.InternalServerError, "Something failed while creating a user account");
         }
     }
 }

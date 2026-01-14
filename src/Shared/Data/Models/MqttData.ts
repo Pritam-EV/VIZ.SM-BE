@@ -73,7 +73,7 @@ export class MeterTelemetryData {
             else {
                 throw new ArgumentError("TimeStamp", "Invalid date type for TimeStamp in meter telemetry.");
             }
-            
+
             if (isNaN(this.timeStamp.getTime())) {
                 throw new ArgumentError("TimeStamp", "TimeStamp must be valid in meter telemetry.");
             }
@@ -91,7 +91,7 @@ export class MeterTelemetryData {
                 throw new ArgumentError("Status", "Status must be valid in meter telemetry.");
             }
         }
-        
+
         if ("Uptime" in jsonData && hasData(jsonData.Uptime)) {
             if (!(typeof jsonData.Uptime === "number" && jsonData.Uptime > 0)) {
                 throw new ArgumentError("Uptime", "Uptime must be valid in meter telemetry.");

@@ -67,63 +67,39 @@ export default class UserController {
         }
     }
 
-async topupUserDevice(req: Request, res: Response) {
-    verifyProfile(req as RequestWithUser, ProfileFlags.User);
-    
-    // ✅ FIXED: Safe pId extraction + logging
-    const user = (req as RequestWithUser).customContext.user;
-    
-    // DEBUG LOGGING (remove after fix works)
-    console.log('🔍 TOPUP DEBUG:', {
-        pIds: user?.pIds,
-        pIdsLength: user?.pIds?.length,
-        deviceId: req.body.deviceId,
-        amount: req.body.amount,
-        rate: req.body.rate
-    });
-    
-    if (!user?.pIds?.length) {
-        (req as RequestWithLoggerOnly).customContext.logger.error("No user profile found", { userId: user?.id });
-        res.status(ResponseStatus.BadRequest).json(new AlertsResponse({
-            type: "danger",  // ✅ FIXED: Correct AlertTypes enum!
-            message: "User profile not found"
-        } as any));  // ✅ Type assertion for safety
-        return;
-    }
+    async topupUserDevice(req: Request, res: Response) {
+        verifyProfile(req as RequestWithUser, ProfileFlags.User);
+        if ((req as RequestWithUser).customContext.user.pIds?.length) {
+            const errorResult = await (new TopupUserDevice.Handler((req as RequestWithUser).customContext.logger)).handle(
+                new TopupUserDevice.Command(
+                    (req as RequestWithUser).customContext.user.pIds![0],
+                    req.body.deviceId,
+                    req.body.amount,
+                    req.body.rate,
+                    req.body.currency || "INR"
+                )
+            );
 
-    const profileId = user.pIds[0];
-
-    const errorResult = await (new TopupUserDevice.Handler((req as RequestWithUser).customContext.logger)).handle(
-        new TopupUserDevice.Command(
-            profileId,
-            req.body.deviceId,
-            req.body.amount,
-            req.body.rate,
-            req.body.currency || "INR"
-        )
-    );
-
-    if (errorResult) {
-        (req as RequestWithLoggerOnly).customContext.logger.error("Failed to topup user device", { 
-            errorResult: errorResult,
-            profileId,
-            deviceId: req.body.deviceId
-        });
-        if ("alert" in errorResult && errorResult.alert) {
-            res.status(errorResult.httpCode).json(new AlertsResponse(errorResult.alert));
-        }
-        else if (errorResult.doExposeMessage) {
-            res.status(errorResult.httpCode).json(new BaseMessageResponse(errorResult.message));
+            if (errorResult) {
+                (req as RequestWithLoggerOnly).customContext.logger.error("Failed to topup user device", { errorResult: errorResult });
+                if ("alert" in errorResult && errorResult.alert) {
+                    res.status(errorResult.httpCode).json(new AlertsResponse(errorResult.alert));
+                }
+                else if (errorResult.doExposeMessage) {
+                    res.status(errorResult.httpCode).json(new BaseMessageResponse(errorResult.message));
+                }
+                else {
+                    res.status(errorResult.httpCode).end();
+                }
+            }
+            else {
+                res.status(ResponseStatus.NoContent).end();
+            }
         }
         else {
-            res.status(errorResult.httpCode).end();
+            res.status(ResponseStatus.BadRequest).end();
         }
     }
-    else {
-        res.status(ResponseStatus.NoContent).end();
-    }
-}
-
 
     async userDeviceTopupHistory(req: Request, res: Response) {
         verifyProfile(req as RequestWithUser, ProfileFlags.User);
@@ -131,7 +107,11 @@ async topupUserDevice(req: Request, res: Response) {
             const [isSuccessful, resultData] = await (new UserDeviceTopupHistory.Handler((req as RequestWithUser).customContext.logger)).handle(
                 new UserDeviceTopupHistory.Query(
                     (req as RequestWithUser).customContext.user.pIds![0],
-                    req.query.deviceId as string
+                    req.query.deviceId as string,
+                    req.query.startDate ? new Date((new Date(req.query.startDate as string)).setHours(0, 0, 0, 0)) : undefined,
+                    req.query.endDate ? new Date((new Date(req.query.endDate as string)).setHours(23, 59, 59, 999)) : undefined,
+                    (req.query.page as unknown) as number,
+                    (req.query.pageSize as unknown) as number
                 )
             );
 
@@ -160,7 +140,13 @@ async topupUserDevice(req: Request, res: Response) {
         verifyProfile(req as RequestWithUser, ProfileFlags.User);
         if ((req as RequestWithUser).customContext.user.pIds?.length) {
             const [isSuccessful, resultData] = await (new UserWalletHistory.Handler((req as RequestWithUser).customContext.logger)).handle(
-                new UserWalletHistory.Query((req as RequestWithUser).customContext.user.pIds![0])
+                new UserWalletHistory.Query(
+                    (req as RequestWithUser).customContext.user.pIds![0],
+                    req.query.startDate ? new Date((new Date(req.query.startDate as string)).setHours(0, 0, 0, 0)) : undefined,
+                    req.query.endDate ? new Date((new Date(req.query.endDate as string)).setHours(23, 59, 59, 999)) : undefined,
+                    (req.query.page as unknown) as number,
+                    (req.query.pageSize as unknown) as number
+                )
             );
 
             if (isSuccessful) {

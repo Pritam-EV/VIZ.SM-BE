@@ -5,7 +5,7 @@ import type { QoS } from "../../Shared/Common/Constants/MqttConstants.js";
 import { MeterTelemetryData } from "../../Shared/Data/Models/MqttData.js";
 import { MqttIncomingMessage, MqttReceivedDeadLetter } from "../../Shared/Data/MongoDB/Models/MqttMessage.js";
 import { streamChunks } from "../../Shared/Data/MongoDB/Helpers/QueryHelpers.js";
-import { Device, MeterTelemetry, type IElectricTelemetry } from "../../Shared/Data/MongoDB/Models/Device.js";
+import { Device, DeviceStatus, MeterTelemetry, type IElectricTelemetry } from "../../Shared/Data/MongoDB/Models/Device.js";
 import FixedSizeQueue from "../../Shared/Common/Models/FixedSizeQueue.js";
 // import { isAnyDataType } from "../../Shared/Common/Helpers/TypeHelpers.js";
 
@@ -353,11 +353,13 @@ async function invalidateReceivedMqttIncomingPacketAsync(mqttIncomingMessageId: 
         await mongooseSession.withTransaction(
             async () => {
                 await MqttReceivedDeadLetter.create(
-                    {
-                        topic: topic,
-                        packet: packet,
-                        reason: reason ?? undefined
-                    },
+                    [
+                        {
+                            topic: topic,
+                            packet: packet,
+                            reason: reason ?? undefined
+                        }
+                    ],
                     { session: mongooseSession }
                 );
 
@@ -379,7 +381,7 @@ async function invalidateReceivedMqttIncomingPacketAsync(mqttIncomingMessageId: 
     }
     finally {
         if (mongooseSession) {
-            mongooseSession.endSession();
+            await mongooseSession.endSession();
         }
     }
 }
@@ -448,7 +450,9 @@ async function processMeterTelemetry(mqttIncomingMessageId: string, topic: strin
                     },
                     {
                         $set: {
-                            telemetry: deviceTelemetry
+                            telemetry: deviceTelemetry,
+                            totalEnergy: meterTelemetry.totalEnergy,
+                            status: meterTelemetry.status ? DeviceStatus.Active : DeviceStatus.Inactive
                         }
                     },
                     { session: mongooseSession! }
@@ -479,7 +483,7 @@ async function processMeterTelemetry(mqttIncomingMessageId: string, topic: strin
     }
     finally {
         if (mongooseSession) {
-            mongooseSession.endSession();
+            await mongooseSession.endSession();
         }
     }
 }

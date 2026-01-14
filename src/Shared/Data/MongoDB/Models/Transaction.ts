@@ -1,9 +1,9 @@
 import { Schema, model, type InferSchemaType } from "mongoose";
-import { DeviceTransactionSource, WalletTransactionDestination, WalletTransactionSource } from "../../../Common/Enums/Transaction.js";
-import type { IDeviceTransaction, IWalletTransaction } from "../IModels/Transaction.js";
+import { DeviceTransactionSource, WalletTransactionStatus, WalletTransactionType } from "../../../Common/Enums/Transaction.js";
+import type { IDeviceTransaction, IWalletTransaction } from "../IModels//Transaction.js";
 
 export type { IDeviceTransaction, IWalletTransaction };
-export { DeviceTransactionSource, WalletTransactionDestination, WalletTransactionSource };
+export { DeviceTransactionSource, WalletTransactionStatus, WalletTransactionType };
 
 // const DeviceTransactionSchema = new Schema<IDeviceTransaction>(
 const DeviceTransactionSchema = new Schema(
@@ -42,8 +42,11 @@ const DeviceTransactionSchema = new Schema(
         source: {
             type: Schema.Types.Number,
             required: true,
-            enum: Object.values(DeviceTransactionSource),
-            //default: DeviceTransactionSource.Unknown,
+            enum: {
+                values: Object.values(DeviceTransactionSource).filter(dts => typeof dts === "number"),
+                message: "'{VALUE}' is not a valid device transaction source"
+            },
+            default: DeviceTransactionSource.Unknown,
             immutable: true
         },
         reversedAt: {
@@ -72,7 +75,6 @@ const WalletTransactionSchema = new Schema(
         amount: {
             type: Schema.Types.Number,
             required: true,
-            min: [0, "Amount must be positive"],
             default: 0,
             immutable: true
         },
@@ -81,18 +83,23 @@ const WalletTransactionSchema = new Schema(
             required: true,
             immutable: true
         },
-        source: {
+        status: {
             type: Schema.Types.Number,
             required: true,
-            enum: Object.values(WalletTransactionSource),
-            default: WalletTransactionSource.Unknown,
-            immutable: true
+            enum: {
+                values: Object.values(WalletTransactionStatus).filter(wts => typeof wts === "number"),
+                message: "'{VALUE}' is not a valid wallet transaction status"
+            },
+            default: WalletTransactionStatus.Successful
         },
-        creditedTo: {
-            type: Schema.Types.Number,
+        type: {
+            type: Schema.Types.String,
             required: true,
-            enum: Object.values(WalletTransactionDestination),
-            default: WalletTransactionDestination.Unknown,
+            enum: {
+                values: Object.values(WalletTransactionType),
+                message: "'{VALUE}' is not a valid wallet transaction type"
+            },
+            default: WalletTransactionType.Unknown,
             immutable: true
         },
         summary: {

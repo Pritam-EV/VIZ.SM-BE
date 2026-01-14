@@ -1,0 +1,17 @@
+export enum CashfreeOrderStatus {
+    ACTIVE = "ACTIVE",
+    PAID = "PAID",
+    EXPIRED = "EXPIRED",
+    TERMINATED = "TERMINATED",
+    TERMINATION_REQUESTED = "TERMINATION_REQUESTED"
+}
+
+export enum CashfreePaymentStatus {
+    SUCCESS = "SUCCESS",
+    NOT_ATTEMPTED = "NOT_ATTEMPTED",
+    FAILED = "FAILED",
+    USER_DROPPED = "USER_DROPPED",
+    VOID = "VOID",
+    CANCELLED = "CANCELLED",
+    PENDING = "PENDING"
+}

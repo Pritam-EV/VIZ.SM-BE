@@ -1,8 +1,7 @@
 import { isObjectIdOrHexString, mongo, Schema, startSession } from "mongoose";
-import { AlertTypes } from "../../../Shared/Common/Enums/AlertTypes.js";
 import { ResponseStatus } from "../../../Shared/Common/Enums/Http.js";
 import type Logger from "../../../Shared/Common/Models/Logging.js";
-import { Alert } from "../../../Shared/Common/Models/Responses.js";
+import { Alert, AlertTypes } from "../../../Shared/Common/Models/Responses.js";
 import { UserDeviceHistory, type TUserDeviceHistory } from "../../../Shared/Data/MongoDB/Models/Archive.js";
 import { Device } from "../../../Shared/Data/MongoDB/Models/Device.js";
 import { User, UserStatus, type TUser } from "../../../Shared/Data/MongoDB/Models/User.js";
@@ -42,7 +41,7 @@ export class Handler {
                     alert: new Alert("Please sign up", AlertTypes.Critical)
                 };
             }
-            if(!isObjectIdOrHexString(command.userId)) {
+            if (!isObjectIdOrHexString(command.userId)) {
                 return {
                     httpCode: ResponseStatus.Unauthorized,
                     message: "Invalid userId",
@@ -127,7 +126,8 @@ export class Handler {
                                 unlinkedAt: now,
                                 reason: "RemovedByUser"
                             } as TUserDeviceHistory
-                        })
+                        }),
+                        { session: mongooseSession }
                     );
 
                     return await User.updateOne(
@@ -140,7 +140,8 @@ export class Handler {
                                     ? { _id: command.deviceIds[0] }
                                     : { _id: { $in: command.deviceIds } }
                             }
-                        }
+                        },
+                        { session: mongooseSession! }
                     ).exec();
                 }
             );
@@ -171,7 +172,7 @@ export class Handler {
         }
         finally {
             if (mongooseSession) {
-                mongooseSession.endSession();
+                await mongooseSession.endSession();
             }
         }
     }

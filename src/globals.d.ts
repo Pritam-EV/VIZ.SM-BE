@@ -19,6 +19,9 @@ declare global {
             MIN_ALLOWED_PAYMENT: number | string;
             CLIENT_URL: string;
             PORT: number | string;
+            CASHFREE_CLIENT_ID: string;
+            CASHFREE_CLIENT_SECRET: string;
+            OUR_PHONE: number | string;
         }
     }
 }

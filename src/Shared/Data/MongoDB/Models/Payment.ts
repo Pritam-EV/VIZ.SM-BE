@@ -1,7 +1,9 @@
 import { Schema, model, type InferSchemaType } from "mongoose";
+import { PaymentGateway, PaymentMethod } from "../../../Common/Enums/Transaction.js";
 import type { IPayment } from "../IModels/Transaction.js";
 
 export type { IPayment };
+export { PaymentGateway, PaymentMethod };
 
 /**
  * @todo write validator and setter for isUsed
@@ -13,6 +15,16 @@ const PaymentSchema = new Schema(
             type: Schema.Types.String,
             required: true,
             // unique: true, // implicit
+            immutable: true
+        },
+        gateway: {
+            type: Schema.Types.Number,
+            required: true,
+            enum: {
+                values: Object.values(PaymentGateway).filter(pg => typeof pg === "number"),
+                message: "'{VALUE}' is not a valid payment gateway"
+            },
+            default: PaymentGateway.None,
             immutable: true
         },
         /**
@@ -33,6 +45,16 @@ const PaymentSchema = new Schema(
         currency: {
             type: Schema.Types.String,
             required: true,
+            immutable: true
+        },
+        method: {
+            type: Schema.Types.String,
+            required: true,
+            enum: {
+                values: Object.values(PaymentMethod),
+                message: "'{VALUE}' is not a valid wallet transaction source"
+            },
+            default: PaymentMethod.Unknown,
             immutable: true
         },
         initiatedAt: {

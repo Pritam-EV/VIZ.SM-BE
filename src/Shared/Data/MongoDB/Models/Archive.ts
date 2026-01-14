@@ -4,7 +4,7 @@ import type { IUserDeviceHistory } from "../IModels/Archive.js";
 export type { IUserDeviceHistory };
 
 const UserDeviceHistorySchema = new Schema<IUserDeviceHistory>(
-// const UserDeviceHistorySchema = new Schema(
+    // const UserDeviceHistorySchema = new Schema(
     {
         device: {
             type: Schema.Types.String,

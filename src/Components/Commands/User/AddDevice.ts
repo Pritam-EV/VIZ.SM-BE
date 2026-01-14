@@ -1,8 +1,7 @@
 import { isObjectIdOrHexString } from "mongoose";
-import { AlertTypes } from "../../../Shared/Common/Enums/AlertTypes.js";
 import { ResponseStatus } from "../../../Shared/Common/Enums/Http.js";
 import type Logger from "../../../Shared/Common/Models/Logging.js";
-import { Alert } from "../../../Shared/Common/Models/Responses.js";
+import { Alert, AlertTypes } from "../../../Shared/Common/Models/Responses.js";
 import { Device, DeviceStatus } from "../../../Shared/Data/MongoDB/Models/Device.js";
 import { User, UserStatus, type IUserDevice } from "../../../Shared/Data/MongoDB/Models/User.js";
 
@@ -88,7 +87,7 @@ export class Handler {
                 };
             }
 
-            const newUserDevice = {
+            const newUserDevice: IUserDevice = {
                 device: device._id,
                 linkedAt: new Date()
             };
@@ -96,7 +95,7 @@ export class Handler {
                 {
                     _id: command.userId,
                     status: UserStatus.Active,
-                    "devices.device": { $ne: newUserDevice.device}
+                    "devices.device": { $ne: newUserDevice.device }
                 },
                 {
                     $push: {

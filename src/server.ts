@@ -22,7 +22,6 @@ const server = app.listen(port, (error) => {
 
     console.info(`🚀 Server running on port ${port}`);
     console.info(`Listening on ${JSON.stringify(server.address())}`);
-    console.log(`✅ API:https://smeter.vjratechnologies.com/api/account/signup/user`);
 });
 
 // MqttService.startProcessingIncommingMessages();

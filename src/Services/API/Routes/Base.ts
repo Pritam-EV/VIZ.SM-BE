@@ -1,6 +1,7 @@
 import { Router } from "express";
 import AuthController from "../Controllers/Auth.js";
 import HealthController from "../Controllers/Health.js";
+import { ResponseStatus } from "../../../Shared/Common/Enums/Http.js";
 
 const baseRouter = Router();
 
@@ -14,7 +15,7 @@ baseRouter.all("/error", healthController.error);
 baseRouter.all("/ping", healthController.ping);
 
 baseRouter.all("*anything", async (req, res) => {
-    res.status(404).end();
+    res.status(ResponseStatus.NotFound).end();
 });
 
 export default baseRouter;

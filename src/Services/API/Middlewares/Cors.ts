@@ -4,7 +4,7 @@ const corsHandler = cors(
     {
         // Allowed origins
         origin: [
-            process.env.CLIENT_URL!
+            process.env.CLIENT_URL
         ],
         methods: [
             "GET",
@@ -14,6 +14,9 @@ const corsHandler = cors(
             "DELETE"
         ],
         credentials: true, // Allow cookies and authentication headers to be sent with cross-origin requests
+        allowedHeaders: [
+            "Authorization"
+        ]
     }
 );
 

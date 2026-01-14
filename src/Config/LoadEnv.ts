@@ -19,7 +19,6 @@ if (process.env.NODE_ENV == Environment.Development) {
 }
 else {
     config();
-    
 }
 
 interface EnvironmentVariableDetails {
@@ -44,10 +43,13 @@ try {
         "RAZORPAY_KEY_SECRET", // Razorpay client secret for connection and verification
         "MIN_ALLOWED_PAYMENT", // Minimum payment amount allowed to process through payment gateway to add into user wallet
         "CLIENT_URL", // Frontend url to restrict cross origin clients
-        "PORT" // Port for hosting this application
+        "PORT", // Port for hosting this application
+        "CASHFREE_CLIENT_ID", // Cashfree client id for connection and verification
+        "CASHFREE_CLIENT_SECRET", // Cashfree client secret for connection and verification
+        "OUR_PHONE" // Our contact phone number
     ];
     const NumericEnvVars: Set<string> = new Set<string>(
-        ["MQTT_CONNECT_TIMEOUT", "MQTT_RECONNECT_PERIOD", "MIN_ALLOWED_PAYMENT", "PORT"]
+        ["MQTT_CONNECT_TIMEOUT", "MQTT_RECONNECT_PERIOD", "MIN_ALLOWED_PAYMENT", "PORT", "OUR_PHONE"]
     );
 
     for (const envVar of requiredEnvVars) {
@@ -75,4 +77,4 @@ if (missingOrInvalidEnvVars.length > 0) {
 
 missingOrInvalidEnvVars = undefined;
 
-LocalEnvVars.initialize(fs.readFileSync(process.env.JWT_SECRET_PATH, 'utf8'), fs.readFileSync(process.env.JWT_SECRET_PUBLIC_PATH, 'utf8'));
+LocalEnvVars.initialize(fs.readFileSync(process.env.JWT_SECRET_PATH || "./keys/private_key.pem", 'utf8'), fs.readFileSync(process.env.JWT_SECRET_PUBLIC_PATH || "./keys/public_key.pem", 'utf8'));

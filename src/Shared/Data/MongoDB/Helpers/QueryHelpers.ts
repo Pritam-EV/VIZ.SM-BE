@@ -34,7 +34,7 @@ export async function* streamChunks<TDocument>(
         .find(filter || {}, projection || {}, options)
         .cursor(cursorOptions)
     ;
-    
+
     try {
         let chunk: (Readonly<TDocument>)[] = [];
 

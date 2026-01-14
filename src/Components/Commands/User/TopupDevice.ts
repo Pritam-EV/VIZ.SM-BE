@@ -1,10 +1,9 @@
 import mongoose from "mongoose";
-import { AlertTypes } from "../../../Shared/Common/Enums/AlertTypes.js";
 import { ResponseStatus } from "../../../Shared/Common/Enums/Http.js";
 import type Logger from "../../../Shared/Common/Models/Logging.js";
-import { Alert } from "../../../Shared/Common/Models/Responses.js";
+import { Alert, AlertTypes } from "../../../Shared/Common/Models/Responses.js";
 import { Device, DeviceStatus } from "../../../Shared/Data/MongoDB/Models/Device.js";
-import { DeviceTransaction, DeviceTransactionSource, WalletTransaction, WalletTransactionDestination, WalletTransactionSource } from "../../../Shared/Data/MongoDB/Models/Transaction.js";
+import { DeviceTransaction, DeviceTransactionSource, WalletTransaction, WalletTransactionStatus, WalletTransactionType } from "../../../Shared/Data/MongoDB/Models/Transaction.js";
 import { User, UserStatus } from "../../../Shared/Data/MongoDB/Models/User.js";
 
 export class Command {
@@ -19,7 +18,7 @@ export class Command {
      * @param userId - Id of the user
      * @param deviceId - Id of the device
      * @param amount - Amount to use from user wallet for device topup.
-     * @param rate - Energy units to credit in device pool. Unit: Amount per Kilo Watt Hour e.g. (₹/kWh)
+     * @param rate - Device energy unit rate. Unit: Amount per Kilo Watt Hour e.g. (₹/kWh)
      * @param currency - Currency of the amount e.g. INR
      */
     constructor(userId: string, deviceId: string, amount: number, rate: number, currency: string = "INR") {
@@ -66,7 +65,7 @@ export class Handler {
                     alert: new Alert("Please sign up", AlertTypes.Critical)
                 };
             }
-            if(!mongoose.isObjectIdOrHexString(command.userId)) {
+            if (!mongoose.isObjectIdOrHexString(command.userId)) {
                 return {
                     httpCode: ResponseStatus.Unauthorized,
                     message: "Invalid userId",
@@ -122,18 +121,10 @@ export class Handler {
                     _id: 1,
                     status: 1,
                     rate: 1,
-                    pool: 1
+                    energyLimit: 1
                 },
                 { lean: true }
             ).lean().exec();
-
-            this.#logger.info("DEBUG DEVICE FOUND", {
-                deviceId: device?._id,
-                deviceIdType: typeof device?._id
-                });
-
-
-            
 
             if (!device) {
                 return {
@@ -183,13 +174,6 @@ export class Handler {
                 }
             );
 
-            this.#logger.info("DEBUG USER LOOKUP", {
-                userId: command.userId,
-                deviceIdUsedInQuery: device._id,
-                userFound: !!user
-                });
-
-
             if (!user) {
                 return {
                     httpCode: ResponseStatus.NotFound,
@@ -204,7 +188,7 @@ export class Handler {
                 };
             }
             this.#logger.info(
-                "Updating user device pool balance",
+                "Updating user device energy limit",
                 {
                     userId: command.userId,
                     deviceId: command.deviceId,
@@ -213,7 +197,7 @@ export class Handler {
                     rate: command.rate,
                     deviceRate: command.rate != device.rate ? device.rate : undefined,
                     userBalance: user.balance,
-                    poolBalance: device.pool
+                    energyLimit: device.energyLimit
                 }
             );
 
@@ -222,28 +206,32 @@ export class Handler {
             mongooseSession.startTransaction();
             try {
                 const deviceTxns = await DeviceTransaction.create(
-                    {
-                        device: device._id,
-                        energy: energy,
-                        rate: command.rate,
-                        amount: amount,
-                        currency: command.currency,
-                        source: DeviceTransactionSource.UserBalance,
-                        user: user._id
-                    },
+                    [
+                        {
+                            device: device._id,
+                            energy: energy,
+                            rate: command.rate,
+                            amount: amount,
+                            currency: command.currency,
+                            source: DeviceTransactionSource.UserBalance,
+                            user: user._id
+                        }
+                    ],
                     { session: mongooseSession }
                 );
 
                 await WalletTransaction.create(
-                    {
-                        amount: amount,
-                        currency: command.currency,
-                        source: WalletTransactionSource.UserBalance,
-                        creditedTo: WalletTransactionDestination.Device,
-                        summary: `${device._id} topup`,
-                        txnId: (deviceTxns[0]!)._id,
-                        user: user._id
-                    },
+                    [
+                        {
+                            amount: amount,
+                            currency: command.currency,
+                            status: WalletTransactionStatus.Successful,
+                            type: WalletTransactionType.Transfer,
+                            summary: `${device._id} topup`,
+                            txnId: (deviceTxns[0]!)._id,
+                            user: user._id
+                        }
+                    ],
                     { session: mongooseSession }
                 );
 
@@ -271,13 +259,13 @@ export class Handler {
                             ]
                         },
                         {
-                            $inc: { pool: energy }
+                            $inc: { energyLimit: energy }
                         },
                         { session: mongooseSession }
                     ).exec();
 
                     if ((isSuccessful = deviceUpdateResult.modifiedCount === 1)) {
-                        mongooseSession.commitTransaction();
+                        await mongooseSession.commitTransaction();
                     }
                     else {
                         this.#logger.warn("Failed to topup user device due to device update failure", { input: command, updateResult: deviceUpdateResult });
@@ -313,7 +301,7 @@ export class Handler {
                 }
 
                 if (errorResult) {
-                    mongooseSession.abortTransaction();
+                    await mongooseSession.abortTransaction();
 
                     return errorResult;
                 }
@@ -328,7 +316,7 @@ export class Handler {
                 }
             }
             finally {
-                mongooseSession.endSession();
+                await mongooseSession.endSession();
             }
 
             if (isSuccessful) {

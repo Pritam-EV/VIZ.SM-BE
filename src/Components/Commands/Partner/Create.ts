@@ -1,11 +1,9 @@
 import { Error as MongooseErrors, mongo, startSession } from "mongoose";
-import { AlertError, HttpError } from "../../../Shared/Common/CustomErrors/HttpErrors.js";
-import { ErrorAlertTypes } from "../../../Shared/Common/Enums/AlertTypes.js";
-import { ResponseStatus } from "../../../Shared/Common/Enums/Http.js";
+import { getPasswordHash } from "../../Helpers/LoginHelpers.js";
+import { AlertError, ErrorAlertTypes, HttpError, ResponseStatus } from "../../../Shared/Common/CustomErrors/HttpErrors.js";
 import type Logger from "../../../Shared/Common/Models/Logging.js";
 import { Login, LoginStatus } from "../../../Shared/Data/MongoDB/Models/Login.js";
 import { Partner, PartnerStatus } from "../../../Shared/Data/MongoDB/Models/Partner.js";
-import { getPasswordHash } from "../../Helpers/LoginHelpers.js";
 
 export class Command {
     firstName: string;
@@ -41,6 +39,17 @@ export class Handler {
         try {
             const [newLogin, invalidLoginFields] = await this.#buildLogin(command);
 
+            if (invalidLoginFields && invalidLoginFields.length > 0) {
+                let invalidFieldIndex = invalidLoginFields.indexOf("midName");
+                if (invalidFieldIndex >= 0) {
+                    invalidLoginFields[invalidFieldIndex] = "middleName";
+                }
+                invalidFieldIndex = invalidLoginFields.indexOf("pass");
+                if (invalidFieldIndex >= 0) {
+                    invalidLoginFields[invalidFieldIndex] = "password";
+                }
+            }
+
             const invalidFields: string[] = invalidLoginFields ?? [];
             if (!(typeof command.pan === "string" && command.pan)) {
                 invalidFields.push("pan");
@@ -49,15 +58,6 @@ export class Handler {
                 invalidFields.push("aadhar");
             }
             if (invalidFields.length > 0) {
-                let invalidFieldIndex = invalidFields.indexOf("midName");
-                if (invalidFieldIndex >= 0) {
-                    invalidFields[invalidFieldIndex] = "middleName";
-                }
-                invalidFieldIndex = invalidFields.indexOf("pass");
-                if (invalidFieldIndex >= 0) {
-                    invalidFields[invalidFieldIndex] = "password";
-                }
-
                 return [false, invalidFields];
             }
 
@@ -100,10 +100,12 @@ export class Handler {
                         );
 
                         await Partner.create(
-                            {
-                                status: PartnerStatus.Active,
-                                login: savedLogin._id
-                            },
+                            [
+                                {
+                                    status: PartnerStatus.Active,
+                                    login: savedLogin._id
+                                }
+                            ],
                             { session: mongooseSession }
                         );
                     }
@@ -118,13 +120,13 @@ export class Handler {
             if (error instanceof HttpError) {
                 throw error;
             }
-            this.#logger.error(error as Error, "Error occured while creating a partner.", { input: command });
+            this.#logger.error(error as Error, "Error occured while creating a partner", { input: command });
 
-            throw new HttpError(500, "Something failed while creating a partner account.");
+            throw new HttpError(ResponseStatus.InternalServerError, "Something failed while creating a partner account");
         }
         finally {
             if (mongooseSession) {
-                mongooseSession.endSession();
+                await mongooseSession.endSession();
             }
         }
     }
@@ -136,8 +138,7 @@ export class Handler {
                     firstName: command.firstName,
                     mobile: command.mobile,
                     email: command.email,
-                    // pass: await getPasswordHash(command.password, false),
-                    pass: command.password,
+                    pass: await getPasswordHash(command.password, false),
                     status: LoginStatus.Active,
                     aadhar: command.aadhar,
                     pan: command.pan,

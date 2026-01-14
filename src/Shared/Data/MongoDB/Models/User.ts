@@ -5,8 +5,8 @@ import type { IUser, IUserDevice } from "../IModels/Member.js";
 export type { IUser, IUserDevice };
 export { UserStatus };
 
-// const UserDeviceSchema = new Schema<IUserDevice>(
-const UserDeviceSchema = new Schema(
+const UserDeviceSchema = new Schema<IUserDevice>(
+    // const UserDeviceSchema = new Schema(
     {
         device: {
             type: Schema.Types.String,

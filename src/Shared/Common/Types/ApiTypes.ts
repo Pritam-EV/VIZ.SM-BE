@@ -4,6 +4,8 @@ import type { JwtPayload } from "jsonwebtoken";
 import type { ProfileFlags } from "../Enums/Member.js";
 import type Logger from "../Models/Logging.js";
 
+export type { Logger, ProfileFlags };
+
 export interface ILoginTokenPayload extends JwtPayload {
     roles: ProfileFlags | 0;
     pIds?: [string, string?] | undefined;

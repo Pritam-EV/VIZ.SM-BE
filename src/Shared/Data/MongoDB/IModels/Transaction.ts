@@ -1,4 +1,4 @@
-import type { DeviceTransactionSource, WalletTransactionDestination, WalletTransactionSource } from "../../../Common/Enums/Transaction.js";
+import type { DeviceTransactionSource, PaymentGateway, PaymentMethod, WalletTransactionStatus, WalletTransactionType } from "../../../Common/Enums/Transaction.js";
 import type { IDeviceLink } from "./Device.js";
 import type { IModel } from "./ModelBase.js";
 
@@ -14,15 +14,19 @@ interface IPaymentLink {
 
 export interface IOrder extends IModel<string> {
     receiptId: string;
+    gateway: PaymentGateway;
     amount: number;
     currency: string;
     orderedAt: Date;
     status: string;
+    paymentAt: Date;
 }
 
 export interface IPayment extends IModel<string> {
+    gateway: PaymentGateway;
     amount: number;
     currency: string;
+    method: PaymentMethod;
     initiatedAt: Date;
     status: string;
     isSuccessful: boolean;
@@ -44,8 +48,8 @@ export interface IDeviceTransaction extends IDeviceLink {
 export interface IWalletTransaction {
     amount: number;
     currency: string;
-    source: WalletTransactionSource;
-    creditedTo: WalletTransactionDestination;
+    status: WalletTransactionStatus;
+    type: WalletTransactionType;
     summary: string;
     txnId?: string;
     refundedAt?: Date;

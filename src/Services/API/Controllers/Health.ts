@@ -1,10 +1,8 @@
 import type { Request, Response } from "express";
 import { ArgumentError } from "../../../Shared/Common/CustomErrors/Errors.js";
-import { HttpError } from "../../../Shared/Common/CustomErrors/HttpErrors.js";
-import { ResponseStatus } from "../../../Shared/Common/Enums/Http.js";
+import { HttpError, ResponseStatus } from "../../../Shared/Common/CustomErrors/HttpErrors.js";
 
-export default class HealthController
-{
+export default class HealthController {
     async ping(req: Request, res: Response) {
         res.status(200).send("pong");
     }

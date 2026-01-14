@@ -196,10 +196,10 @@ const DeviceSchema = new Schema(
             default: 20
         },
         /** Unit: Kilo Watt Hour (kWh) */
-        pool: {
+        energyLimit: {
             type: Schema.Types.Number,
             required: true,
-            min: [0, "Negative energy pool balance is not allowed"],
+            min: [0, "Negative energy limit is not allowed"],
             default: 0
         },
         totalEnergy: {

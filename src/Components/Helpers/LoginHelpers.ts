@@ -21,7 +21,7 @@ export async function getPasswordHash(password: string, throwErrorIfInvalid: boo
     return await bcrypt.hash(password, await bcrypt.genSalt(10));
 }
 
- /** Note: Do not exceed 16 character password limit as bcryptjs hash ignores input beyond 72 bytes. It will lead to match all password prefix from 72 bytes till any. */
+/** Note: Do not exceed 16 character password limit as bcryptjs hash ignores input beyond 72 bytes. It will lead to match all password prefix from 72 bytes till any. */
 export function isValidPasswordString(password: string): boolean {
     return typeof password === "string" && password !== "" && LoginPasswordRegExp.test(password);
 }

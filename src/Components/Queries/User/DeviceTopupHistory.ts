@@ -1,20 +1,27 @@
 import { isObjectIdOrHexString } from "mongoose";
-import { AlertTypes } from "../../../Shared/Common/Enums/AlertTypes.js";
+import DateConstants from "../../../Shared/Common/Constants/DateConstants.js";
 import { ResponseStatus } from "../../../Shared/Common/Enums/Http.js";
 import type Logger from "../../../Shared/Common/Models/Logging.js";
-import { Alert } from "../../../Shared/Common/Models/Responses.js";
-import { Device, DeviceStatus } from "../../../Shared/Data/MongoDB/Models/Device.js";
+import { Alert, AlertTypes } from "../../../Shared/Common/Models/Responses.js";
+import { Device } from "../../../Shared/Data/MongoDB/Models/Device.js";
 import { DeviceTransaction, DeviceTransactionSource } from "../../../Shared/Data/MongoDB/Models/Transaction.js";
 import { User, UserStatus } from "../../../Shared/Data/MongoDB/Models/User.js";
 
 export class Query {
     userId: string;
     deviceId: string;
-    maxTxns: number = 25;
+    from: Date;
+    till: Date;
+    page: number;
+    pageSize: number = 25;
 
-    constructor(userId: string, deviceId: string) {
+    constructor(userId: string, deviceId: string, from?: Date, till?: Date, page: number = 1, pageSize: number = 25) {
         this.userId = userId;
         this.deviceId = deviceId;
+        this.from = from || DateConstants.MinValue;
+        this.till = till || DateConstants.MaxValue;
+        this.page = page || 1;
+        this.pageSize = pageSize || 25;
     }
 }
 
@@ -28,10 +35,8 @@ interface ITransaction {
 
 interface IResult {
     id: string;
-    pool: number;
-    isActive: boolean;
     txns: ITransaction[];
-    hasMore?: true
+    hasMore?: true;
 }
 
 interface IErrorResultBase {
@@ -103,6 +108,38 @@ export class Handler {
                     }
                 ];
             }
+            if (!(query.from instanceof Date && query.till instanceof Date && Number.isFinite(query.from.getTime()) && Number.isFinite(query.till.getTime()))) {
+                return [
+                    false,
+                    {
+                        httpCode: ResponseStatus.BadRequest,
+                        message: "Invalid time period filter",
+                        alert: new Alert("Please select appropriate period", AlertTypes.Error)
+                    }
+                ];
+            }
+            if (query.from > query.till) {
+                return [
+                    false,
+                    {
+                        httpCode: ResponseStatus.BadRequest,
+                        message: `Invalid time period. From datetime (${query.from.toISOString()} is greater than till datetime (${query.till.toISOString()})`,
+                        alert: new Alert("Please select appropriate period", AlertTypes.Error)
+                    }
+                ];
+            }
+            query.page = Math.floor(query.page);
+            query.pageSize = Math.floor(query.pageSize);
+            if (!(typeof query.page === "number" && typeof query.pageSize === "number" && query.page > 0 && query.pageSize > 0)) {
+                return [
+                    false,
+                    {
+                        httpCode: ResponseStatus.BadRequest,
+                        message: "Invalid pagination parameters",
+                        doExposeMessage: true
+                    }
+                ];
+            }
 
             const user = await User.exists(
                 {
@@ -123,33 +160,16 @@ export class Handler {
                 ];
             }
 
-            const device = await Device.findById(
-                query.deviceId,
-                {
-                    _id: 1,
-                    pool: 1,
-                    status: 1
-                },
-                { lean: true }
-            ).lean().exec();
-
-            if (!device?._id) {
-                return [
-                    false,
-                    {
-                        httpCode: ResponseStatus.NotFound,
-                        message: "Device not found",
-                        alert: new Alert("Please select valid device", AlertTypes.Error)
-                    }
-                ];
-            }
-
             const deviceTransactions = await DeviceTransaction.find(
                 {
                     device: query.deviceId,
                     source: DeviceTransactionSource.UserBalance,
                     user: user._id,
-                    energy: { $gt: 0 }
+                    energy: { $gt: 0 },
+                    createdAt: {
+                        $gte: query.from,
+                        $lte: query.till
+                    }
                 },
                 {
                     _id: 1,
@@ -162,15 +182,14 @@ export class Handler {
                     sort: {
                         createdAt: -1
                     },
-                    limit: query.maxTxns,
+                    skip: (query.page - 1) * query.pageSize,
+                    limit: query.pageSize,
                     lean: true
                 }
             ).lean().exec();
 
             const result: IResult = {
-                id: device._id,
-                pool: device.pool,
-                isActive: device.status === DeviceStatus.Active,
+                id: query.deviceId,
                 txns: []
             }
             if (deviceTransactions && deviceTransactions.length > 0) {
@@ -186,7 +205,7 @@ export class Handler {
                     }
                 );
 
-                if (result.txns.length === query.maxTxns) {
+                if (result.txns.length === query.pageSize) {
                     result.hasMore = true;
                 }
             }

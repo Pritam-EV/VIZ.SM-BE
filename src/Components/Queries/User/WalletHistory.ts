@@ -1,32 +1,38 @@
 import { isObjectIdOrHexString } from "mongoose";
-import { AlertTypes } from "../../../Shared/Common/Enums/AlertTypes.js";
+import DateConstants from "../../../Shared/Common/Constants/DateConstants.js";
 import { ResponseStatus } from "../../../Shared/Common/Enums/Http.js";
 import type Logger from "../../../Shared/Common/Models/Logging.js";
-import { Alert } from "../../../Shared/Common/Models/Responses.js";
-import { WalletTransaction, WalletTransactionDestination, WalletTransactionSource } from "../../../Shared/Data/MongoDB/Models/Transaction.js";
+import { Alert, AlertTypes } from "../../../Shared/Common/Models/Responses.js";
+import { WalletTransaction, WalletTransactionStatus } from "../../../Shared/Data/MongoDB/Models/Transaction.js";
 import { User, UserStatus } from "../../../Shared/Data/MongoDB/Models/User.js";
 
 export class Query {
     userId: string;
-    maxTxns: number = 10;
+    from: Date;
+    till: Date;
+    page: number;
+    pageSize: number = 25;
 
-    constructor(userId: string) {
+    constructor(userId: string, from?: Date, till?: Date, page: number = 1, pageSize: number = 25) {
         this.userId = userId;
+        this.from = from || DateConstants.MinValue;
+        this.till = till || DateConstants.MaxValue;
+        this.page = page || 1;
+        this.pageSize = pageSize || 25;
     }
 }
 
 interface ITransaction {
     id: string;
     amount: number;
+    status: WalletTransactionStatus;
     date: Date;
     refundedAt?: Date;
     summary: string;
     txnId?: string;
-    isInvalid?: true;
 }
 
 interface IResult {
-    balance: number;
     txns: ITransaction[];
     hasMore?: true
 }
@@ -77,22 +83,47 @@ export class Handler {
                     }
                 ];
             }
-            
-            const user = await User.findOne(
+            if (!(query.from instanceof Date && query.till instanceof Date && Number.isFinite(query.from.getTime()) && Number.isFinite(query.till.getTime()))) {
+                return [
+                    false,
+                    {
+                        httpCode: ResponseStatus.BadRequest,
+                        message: "Invalid time period filter",
+                        alert: new Alert("Please select appropriate period", AlertTypes.Error)
+                    }
+                ];
+            }
+            if (query.from > query.till) {
+                return [
+                    false,
+                    {
+                        httpCode: ResponseStatus.BadRequest,
+                        message: `Invalid time period. From datetime (${query.from.toISOString()} is greater than till datetime (${query.till.toISOString()})`,
+                        alert: new Alert("Please select appropriate period", AlertTypes.Error)
+                    }
+                ];
+            }
+            query.page = Math.floor(query.page);
+            query.pageSize = Math.floor(query.pageSize);
+            if (!(typeof query.page === "number" && typeof query.pageSize === "number" && query.page > 0 && query.pageSize > 0)) {
+                return [
+                    false,
+                    {
+                        httpCode: ResponseStatus.BadRequest,
+                        message: "Invalid pagination parameters",
+                        doExposeMessage: true
+                    }
+                ];
+            }
+
+            const user = await User.exists(
                 {
                     _id: query.userId,
                     status: UserStatus.Active
-                },
-                {
-                    _id: 1,
-                    balance: 1
-                },
-                {
-                    lean: true
                 }
-            ).lean().exec();
+            ).exec();
 
-            if (!user) {
+            if (!user?._id) {
                 return [
                     false,
                     {
@@ -106,7 +137,11 @@ export class Handler {
             const walletTransactions = await WalletTransaction.find(
                 {
                     user: user._id,
-                    amount: { $gt: 0 }
+                    amount: { $gt: 0 },
+                    createdAt: {
+                        $gte: query.from,
+                        $lte: query.till
+                    }
                 },
                 {
                     _id: 1,
@@ -122,13 +157,13 @@ export class Handler {
                     sort: {
                         createdAt: -1
                     },
-                    limit: query.maxTxns,
+                    skip: (query.page - 1) * query.pageSize,
+                    limit: query.pageSize,
                     lean: true
                 }
             ).lean().exec();
 
             const result: IResult = {
-                balance: user.balance,
                 txns: []
             }
             if (walletTransactions && walletTransactions.length > 0) {
@@ -136,17 +171,17 @@ export class Handler {
                     wTxn => {
                         return {
                             id: wTxn._id.toString(),
-                            amount: wTxn.creditedTo === WalletTransactionDestination.UserBalance ? wTxn.amount : (-1 * wTxn.amount),
+                            amount: wTxn.amount,
+                            status: wTxn.status,
                             date: wTxn.createdAt,
                             refundedAt: wTxn.refundedAt,
                             summary: wTxn.summary,
-                            txnId: wTxn.txnId,
-                            isInvalid: wTxn.source === WalletTransactionSource.UserBalance && wTxn.creditedTo === WalletTransactionDestination.UserBalance ? true : undefined
+                            txnId: wTxn.txnId
                         } as ITransaction;
                     }
                 );
 
-                if (result.txns.length === query.maxTxns) {
+                if (result.txns.length === query.pageSize) {
                     result.hasMore = true;
                 }
             }

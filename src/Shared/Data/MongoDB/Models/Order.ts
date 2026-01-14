@@ -1,7 +1,9 @@
 import { Schema, model, type InferSchemaType } from "mongoose";
+import { PaymentGateway } from "../../../Common/Enums/Transaction.js";
 import type { IOrder } from "../IModels/Transaction.js";
 
 export type { IOrder };
+export { PaymentGateway };
 
 /**
  * @todo refactor configuring minimum value for amount
@@ -21,6 +23,16 @@ const OrderSchema = new Schema(
             unique: true,
             minLength: [30, "Receipt id must have at least 30 characters"],
             maxLength: [40, "Receipt id must not exceed 40 characters"],
+            immutable: true
+        },
+        gateway: {
+            type: Schema.Types.Number,
+            required: true,
+            enum: {
+                values: Object.values(PaymentGateway).filter(pg => typeof pg === "number"),
+                message: "'{VALUE}' is not a valid payment gateway"
+            },
+            default: PaymentGateway.None,
             immutable: true
         },
         /**

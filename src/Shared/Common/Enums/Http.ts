@@ -18,6 +18,7 @@ export enum ResponseStatus {
     MethodNotAllowed = 405,
     RequestTimeout = 408,
     Conflict = 409,
+    TooManyRequests = 429,
     // Server Error
     InternalServerError = 500,
     NotImplemented = 501,
