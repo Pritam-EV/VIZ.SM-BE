@@ -14,8 +14,8 @@ export default class CashfreeService {
     */
     public static get cashfreeInstance(): Cashfree {
         if (!this.#cashfreeInstance) {
-            const clientId = process.env.CASHFREE_CLIENT_ID;
-            const clientSecret = process.env.CASHFREE_CLIENT_SECRET;
+            const clientId = process.env.CASHFREE_APP_ID;
+            const clientSecret = process.env.CASHFREE_SECRET_KEY;
 
             if (!clientId || !clientSecret) {
                 // throw new Error('Cashfree API client credentials are not defined in environment variables.');
@@ -24,8 +24,8 @@ export default class CashfreeService {
 
             this.#cashfreeInstance = new Cashfree(
                 process.env.NODE_ENV == Environment.Production ? CFEnvironment.PRODUCTION : CFEnvironment.SANDBOX,
-                process.env.CASHFREE_CLIENT_ID,
-                process.env.CASHFREE_CLIENT_SECRET
+                process.env.CASHFREE_APP_ID,
+                process.env.CASHFREE_SECRET_KEY
             );
 
             this.#cashfreeInstance.XApiVersion = "2025-01-01";

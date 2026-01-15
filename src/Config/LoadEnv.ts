@@ -44,8 +44,8 @@ try {
         "MIN_ALLOWED_PAYMENT", // Minimum payment amount allowed to process through payment gateway to add into user wallet
         "CLIENT_URL", // Frontend url to restrict cross origin clients
         "PORT", // Port for hosting this application
-        "CASHFREE_CLIENT_ID", // Cashfree client id for connection and verification
-        "CASHFREE_CLIENT_SECRET", // Cashfree client secret for connection and verification
+        "CASHFREE_APP_ID", // Cashfree client id for connection and verification
+        "CASHFREE_SECRET_KEY", // Cashfree client secret for connection and verification
         "OUR_PHONE" // Our contact phone number
     ];
     const NumericEnvVars: Set<string> = new Set<string>(
