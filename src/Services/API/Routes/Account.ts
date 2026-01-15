@@ -4,7 +4,8 @@ import bcrypt from 'bcrypt';
 import { User } from '../../../Shared/Data/MongoDB/Models/User.js';
 import { Partner } from "../../../Shared/Data/MongoDB/Models/Partner.js";
 import { Device } from "../../../Shared/Data/MongoDB/Models/Device.js";
-import bcrypt from 'bcrypt';
+import authenticateUser from "../Middlewares/UserAuthentication.js";
+import { Login } from "../../../Shared/Data/MongoDB/Models/Login.js";
 
 const accountRouter = Router();
 
@@ -102,7 +103,6 @@ accountRouter.get("/devices/user", authenticateUser, async (req, res) => {
         res.json({
             device: {
                 serialnumber: device._id,
-                pool: device.pool,
                 status: device.status,
                 rate: device.rate,
                 totalEnergy: device.totalEnergy,
