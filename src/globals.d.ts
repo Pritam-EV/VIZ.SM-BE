@@ -14,13 +14,11 @@ declare global {
             MQTT_CLIENT_ID: string;
             MQTT_CONNECT_TIMEOUT: number | string;
             MQTT_RECONNECT_PERIOD: number | string;
-            RAZORPAY_KEY_ID: string;
-            RAZORPAY_KEY_SECRET: string;
             MIN_ALLOWED_PAYMENT: number | string;
             CLIENT_URL: string;
             PORT: number | string;
-            CASHFREE_CLIENT_ID: string;
-            CASHFREE_CLIENT_SECRET: string;
+            CASHFREE_APP_ID: string;
+            CASHFREE_SECRET_KEY: string;
             OUR_PHONE: number | string;
         }
     }
