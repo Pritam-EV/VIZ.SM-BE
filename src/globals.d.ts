@@ -14,6 +14,8 @@ declare global {
             MQTT_CLIENT_ID: string;
             MQTT_CONNECT_TIMEOUT: number | string;
             MQTT_RECONNECT_PERIOD: number | string;
+            RAZORPAY_KEY_ID: string;
+            RAZORPAY_KEY_SECRET: string;
             MIN_ALLOWED_PAYMENT: number | string;
             CLIENT_URL: string;
             PORT: number | string;
