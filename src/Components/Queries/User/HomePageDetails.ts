@@ -20,6 +20,7 @@ interface IDeviceDetails {
     isActive: boolean;
     pool: number;
     totalEnergy: number;
+    rate: number;
 }
 
 interface IResult {
@@ -79,7 +80,8 @@ export class Handler {
                                 _id: 1,
                                 status: 1,
                                 energyLimit: 1,
-                                totalEnergy: 1
+                                totalEnergy: 1,
+                                rate: 1
                             },
                             options: { lean: true }
                         },
@@ -117,7 +119,8 @@ export class Handler {
                             id: (ud.device as IDevice)._id,
                             isActive: (ud.device as IDevice).status == DeviceStatus.Active,
                             pool: (ud.device as IDevice).energyLimit - (ud.device as IDevice).totalEnergy,
-                            totalEnergy: (ud.device as IDevice).totalEnergy
+                            totalEnergy: (ud.device as IDevice).totalEnergy,
+                            rate: (ud.device as IDevice).rate
                         } as IDeviceDetails;
                     }
                 );
