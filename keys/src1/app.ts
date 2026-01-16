@@ -37,9 +37,9 @@ export default function buildApp() {
 
     // CORS: allow your frontend origins
     app.use(corsMiddleware);
-    // Middlewarehttp://https://smartmeter-vjratechnologies.web.app/
+    // Middlewarehttp://https://smeter.vjratechnologies.com/
     app.use(cors({
-    origin: ['http://https://smartmeter-vjratechnologies.web.app/', 'http://https://smartmeter-vjratechnologies.web.app'],
+    origin: ['http://https://smeter.vjratechnologies.com/', 'http://https://smeter.vjratechnologies.com'],
     credentials: true
     }));
 
