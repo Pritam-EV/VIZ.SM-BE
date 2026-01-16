@@ -9,7 +9,6 @@ import baseRouter from "./Services/API/Routes/Base.js";
 import paymentRouter from "./Services/API/Routes/Payment.js";
 import supportRoutes from "./Services/API/Routes/Support.js";
 import userRouter from "./Services/API/Routes/User.js";
-
 export default function buildApp() {
   const app = express();
 
@@ -21,9 +20,20 @@ export default function buildApp() {
   app.use(requestTrackingMiddleware);
 
   // CORS: allow your frontend origins
-  app.use(corsMiddleware);
 
-  app.use("/api/v1/account", accountRouter);
+
+// ✅ COMPLETE CORS SETUP
+app.use(corsMiddleware);
+
+// ✅ Explicit OPTIONS handler (backup)
+app.options('*', corsMiddleware);
+
+// ✅ Body parsers AFTER CORS
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
+
+
+
   app.use("/api/account", accountRouter);
   app.use("/api/v1/auth", authRouter);
   app.use("/api/v1/payment", paymentRouter);
