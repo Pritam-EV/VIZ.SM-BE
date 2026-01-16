@@ -16,7 +16,7 @@ accountRouter.post("/signin", accountController.signIn);
 accountRouter.post("/signup/partner", accountController.partnerSignUp);
 
 accountRouter.post("/signup/user", accountController.userSignUp);
-
+accountRouter.post("/userSignUp", accountController.userSignUp);
 // ================================
 // PASSWORD RESET
 // ================================
