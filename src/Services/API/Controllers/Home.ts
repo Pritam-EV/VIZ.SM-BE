@@ -7,28 +7,27 @@ import { AlertsResponse } from "../../../Shared/Common/Models/Responses.js";
 import type { RequestWithLoggerOnly, RequestWithUser } from "../../../Shared/Common/Types/ApiTypes.js";
 
 export default class HomeController {
-  async getUserHomePageDetails(req: Request, res: Response) {
-    verifyProfile(req as RequestWithUser, ProfileFlags.User);
-    if ((req as RequestWithUser).customContext.user.pIds?.length) {
-      const [isSuccessful, resultData] = await (new GetUserHomePageDetails.Handler((req as RequestWithUser).customContext.logger)).handle(
-        new GetUserHomePageDetails.Query((req as RequestWithUser).customContext.user.pIds![0])
-      );
+async getUserHomePageDetails(req: Request, res: Response) {
+  try {
+    const userId = (req as RequestWithUser).customContext.user.id;
+    if (!userId) {
+      return res.status(401).json({ error: "User ID missing from token" });
+    }
 
-      if (isSuccessful) {
-        res.status(ResponseStatus.Ok).json(resultData);
-      }
-      else {
-        (req as RequestWithLoggerOnly).customContext.logger.error("Failed to fetch details for user home page", { errorResult: resultData });
-        if (resultData.alert) {
-          res.status(resultData.httpCode).json(new AlertsResponse(resultData.alert));
-        }
-        else {
-          res.status(resultData.httpCode).end();
-        }
-      }
+    const [isSuccessful, resultData] = await (new GetUserHomePageDetails.Handler(
+      (req as RequestWithUser).customContext.logger
+    )).handle(new GetUserHomePageDetails.Query(userId));
+
+    if (isSuccessful) {
+      res.status(ResponseStatus.Ok).json(resultData);
+    } else {
+      (req as RequestWithLoggerOnly).customContext.logger.error("Failed to fetch home page details", { errorResult: resultData });
+      res.status(resultData.httpCode || 500).json({ error: resultData.message || "Failed to load data" });
     }
-    else {
-      res.status(ResponseStatus.BadRequest).end();
-    }
+  } catch (error) {
+    console.error("HomeController crash:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
+}
+
 }
