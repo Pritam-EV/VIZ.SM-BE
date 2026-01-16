@@ -33,7 +33,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 
-
+  app.use("/api/v1/account", accountRouter);
   app.use("/api/account", accountRouter);
   app.use("/api/v1/auth", authRouter);
   app.use("/api/v1/payment", paymentRouter);
