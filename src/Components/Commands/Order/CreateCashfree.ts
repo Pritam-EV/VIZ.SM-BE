@@ -134,7 +134,7 @@ export class Handler {
                         customer_phone: CashfreeServiceHelper.contactPhone
                     },
                     order_meta: {
-                        return_url: `${command.returnUrl}?orderId={order_id}`,
+                        return_url: `${command.returnUrl}?orderId={order_id}&amount=${amount}`,
                         // TODO: Add notify_url
                         payment_methods: "cc,dc,ccc,ppc,nb,upi"
                     }
