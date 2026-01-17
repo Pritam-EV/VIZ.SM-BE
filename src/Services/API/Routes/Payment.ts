@@ -1,22 +1,12 @@
 import { Router } from "express";
 import PaymentController from "../Controllers/Payment.js";
-import authenticateUser from "../Middlewares/UserAuthentication.js"; // path based on your project
+import authenticateUser from "../Middlewares/UserAuthentication.js";  // ← YOUR EXACT MIDDLEWARE
 
 const paymentRouter = Router();
-
 const paymentController = new PaymentController();
 
-paymentRouter.post(
-  "/userwallet/order",
-  authenticateUser,                             // ← add this
-  paymentController.createUserWalletTopupOrder  // ← runs after user is set
-);
-
-paymentRouter.get(
-  "/userwallet/orderstatus",
-  authenticateUser,                              // ← add this
-  paymentController.getUserWalletTopupOrderStatus
-);
-
+// ← ADD THESE 2 LINES: Apply authenticateUser to ALL payment routes
+paymentRouter.post("/userwallet/order", authenticateUser, paymentController.createUserWalletTopupOrder);
+paymentRouter.get("/userwallet/orderstatus", authenticateUser, paymentController.getUserWalletTopupOrderStatus);
 
 export default paymentRouter;
