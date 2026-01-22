@@ -17,7 +17,8 @@ export default async function authenticateUser(req: Request, res: Response, next
   // (req as RequestWithUser).customContext.logger.debug("📌 Extracted Token:", token);
 
   jwt.verify(token!, LocalEnvVars.jwtPrivateKey, { algorithms: ["RS256"] }, async (err, decoded) => {
-    if (err) {
+    try {
+      if (err) {
       // Specific error handling for expired token
       if (err instanceof jwt.TokenExpiredError) {
         (req as RequestWithUser).customContext.logger.error("❌ JWT Token Expired:", err);
@@ -40,5 +41,9 @@ export default async function authenticateUser(req: Request, res: Response, next
     (req as RequestWithUser).customContext.logger.addOrUpdateDiagnosticsData(new DiagnosticsContextMemberParam("userId", decoded.sub));
 
     next();
+  }
+  catch (error) {
+    next(error);
+  }
   });
 }
