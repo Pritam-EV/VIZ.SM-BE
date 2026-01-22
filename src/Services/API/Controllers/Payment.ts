@@ -26,17 +26,17 @@ export default class PaymentController {
                 )
             );
 
-                if (isSuccessful) {
-                res.status(ResponseStatus.Ok).json(resultData);
-                } else {
-                (req as RequestWithLoggerOnly).customContext.logger.error(
-                    "Failed to create user wallet order",
-                    { errorResult: resultData }
-                );
+            if (isSuccessful) {
+            res.status(ResponseStatus.Ok).json(resultData);
+            } else {
+            (req as RequestWithLoggerOnly).customContext.logger.error(
+                "Failed to create user wallet order",
+                { errorResult: resultData }
+            );
 
-                // TEMP: expose full error to FE for debugging
-                res.status(resultData.httpCode || ResponseStatus.InternalServerError).json(resultData);
-                }
+            // TEMP: expose full error to FE for debugging
+            res.status(resultData.httpCode || ResponseStatus.InternalServerError).json(resultData);
+            }
 
         }
         else {

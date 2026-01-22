@@ -26,7 +26,7 @@ export default function buildApp() {
   app.use("/api/v1/account", accountRouter);
   app.use("/api/account", accountRouter);
   app.use("/api/v1/auth", authRouter);
-  app.use("/api/v1/payment", paymentRouter);
+  app.use("/api/v1/payment", userAuthMiddleware, paymentRouter);
   app.use('/api/support', userAuthMiddleware, supportRoutes);
   app.use("/api/v1/user", userAuthMiddleware, userRouter);
   app.use("/api/v1", baseRouter);
