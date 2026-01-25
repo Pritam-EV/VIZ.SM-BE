@@ -223,7 +223,7 @@ export class Handler {
                 await WalletTransaction.create(
                     [
                         {
-                            amount: amount,
+                            amount: -1 * amount,
                             currency: command.currency,
                             status: WalletTransactionStatus.Successful,
                             type: WalletTransactionType.Transfer,

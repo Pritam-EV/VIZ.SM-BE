@@ -3,7 +3,7 @@ import DateConstants from "../../../Shared/Common/Constants/DateConstants.js";
 import { ResponseStatus } from "../../../Shared/Common/Enums/Http.js";
 import type Logger from "../../../Shared/Common/Models/Logging.js";
 import { Alert, AlertTypes } from "../../../Shared/Common/Models/Responses.js";
-import { WalletTransaction, WalletTransactionStatus } from "../../../Shared/Data/MongoDB/Models/Transaction.js";
+import { WalletTransaction, type WalletTransactionStatus, type WalletTransactionType } from "../../../Shared/Data/MongoDB/Models/Transaction.js";
 import { User, UserStatus } from "../../../Shared/Data/MongoDB/Models/User.js";
 
 export class Query {
@@ -26,6 +26,7 @@ interface ITransaction {
     id: string;
     amount: number;
     status: WalletTransactionStatus;
+    type: WalletTransactionType;
     date: Date;
     refundedAt?: Date;
     summary: string;
@@ -137,7 +138,7 @@ export class Handler {
             const walletTransactions = await WalletTransaction.find(
                 {
                     user: user._id,
-                    amount: { $gt: 0 },
+                    amount: { $ne: 0 },
                     createdAt: {
                         $gte: query.from,
                         $lte: query.till
@@ -146,8 +147,8 @@ export class Handler {
                 {
                     _id: 1,
                     amount: 1,
-                    source: 1,
-                    creditedTo: 1,
+                    status: 1,
+                    type: 1,
                     summary: 1,
                     txnId: 1,
                     refundedAt: 1,
@@ -173,6 +174,7 @@ export class Handler {
                             id: wTxn._id.toString(),
                             amount: wTxn.amount,
                             status: wTxn.status,
+                            type: wTxn.type,
                             date: wTxn.createdAt,
                             refundedAt: wTxn.refundedAt,
                             summary: wTxn.summary,
