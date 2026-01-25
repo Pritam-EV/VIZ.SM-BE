@@ -40,15 +40,15 @@ export enum WalletTransactionStatus {
 
 export enum WalletTransactionType {
     /** Amount added through payment */
-    Topup = "topup",
+    Topup = "WALLET Topup",
     /** Amount used for device pool topup */
-    Transfer = "transfer",
+    Transfer = "POOL Transfer",
     /** Amount refunded to user */
-    Refund = "refund",
+    Refund = "Refund to bank",
     /** Amount charged for various reasons */
-    Charges = "charges",
+    Charges = "Charges",
     /** Amount reversed from device pool */
-    Reversed = "reversed",
+    Reversed = "Reversed from POOL",
     /** Amount returned to user in extreme case such as account closure */
     Return = "return",
     Other = "other",
